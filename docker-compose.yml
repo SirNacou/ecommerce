@@ -1,0 +1,40 @@
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.7.1
+    container_name: etcd
+    restart: always
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd:2380
+      - --initial-cluster=etcd=http://etcd:2380
+      - --initial-cluster-token=etcd-cluster-token
+      - --initial-cluster-state=new
+      - --log-level=info
+    #ports:
+    #  - "2379:2379"
+    networks:
+      - apisix-net
+
+  apisix:
+    image: apache/apisix:3.17.0-debian
+    container_name: apisix
+    restart: always
+    depends_on:
+      - etcd
+    volumes:
+      - ./apisix_conf/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    ports:
+      - "9080:9080" # Public HTTP API Gateway port
+      - "19443:9443" # HTTPS port (remapped to avoid Windows port 9443 collisions)
+      - "9180:9180" # APISIX Admin API port
+    networks:
+      - apisix-net
+
+networks:
+  apisix-net:
+    driver: bridge
