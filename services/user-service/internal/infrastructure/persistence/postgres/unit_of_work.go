@@ -22,6 +22,12 @@ type sqlcUnitOfWork struct {
 	pool *pgxpool.Pool
 }
 
+func NewSQLCUnitOfWork(pool *pgxpool.Pool) app.UnitOfWork {
+	return &sqlcUnitOfWork{
+		pool: pool,
+	}
+}
+
 // Execute implements [app.UnitOfWork].
 func (uow *sqlcUnitOfWork) Execute(ctx context.Context, fn func(store app.Store) error) error {
 	tx, err := uow.pool.Begin(ctx)
