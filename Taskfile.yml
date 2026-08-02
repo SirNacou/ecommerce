@@ -1,0 +1,11 @@
+version: 3
+
+includes:
+  users:
+    taskfile: ./services/user-service/Taskfile.yml
+    dir: ./services/user-service
+
+tasks:
+  default:
+    cmds:
+      - task --list

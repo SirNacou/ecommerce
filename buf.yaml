@@ -1,0 +1,10 @@
+version: v2
+modules:
+  - path: services/user-service/api/proto
+lint:
+  use:
+    - DEFAULT
+  service_suffix: Service
+breaking:
+  use:
+    - FILE
