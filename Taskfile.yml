@@ -4,6 +4,9 @@ includes:
   users:
     taskfile: ./services/user-service/Taskfile.yml
     dir: ./services/user-service
+  catalog:
+    taskfile: ./services/catalog-service/Taskfile.yml
+    dir: ./services/catalog-service
 
 tasks:
   default:
@@ -20,3 +23,8 @@ tasks:
     cmds:
       - task: infra:up
       - task: users:up
+
+  buf:generate:
+    desc: "Generate code from protobuf definitions"
+    cmds:
+      - buf generate

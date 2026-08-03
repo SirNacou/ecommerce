@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+option go_package = "github.com/SirNacou/ecommerce/services/catalog-service/gen/v1;catalogv1";
+
+service CatalogService {
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+}
+
+message Product {
+  string id = 1;
+  string category_id = 2;
+  string name = 3;
+  string description = 4;
+  int64 price_cents = 5; // Stored in smallest currency unit (cents) to avoid floating point errors
+  int32 stock_quantity = 6;
+  string created_at = 7;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string slug = 2;
+}
+
+message CreateCategoryResponse {
+  Category category = 1;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message CreateProductRequest {
+  string category_id = 1;
+  string name = 2;
+  string description = 3;
+  int64 price_cents = 4;
+  int32 stock_quantity = 5;
+}
+
+message CreateProductResponse {
+  Product product = 1;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
+
+message ListProductsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string category_id = 3;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  string next_page_token = 2;
+}
