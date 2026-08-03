@@ -1,20 +1,26 @@
 apisix:
-  node_listen: 9080 # Gateway HTTP entry port
+  node_listen: ${{APISIX_HTTP_PORT}}
+  plugins:
+    - cors
+    - jwt-auth
+    - key-auth
+    - limit-req
+    - limit-conn
+    - limit-count
+    - proxy-rewrite
+    - request-id
+    - response-rewrite
+    - prometheus
+    - file-logger
 
 deployment:
-  role: traditional
-  role_traditional:
-    config_provider: etcd
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
   admin:
-    enable_admin_ui: true
     allow_admin:
-      - 0.0.0.0/0 # Allow Admin API access from Docker network
+      - 0.0.0.0/0
     admin_key:
       - name: "admin"
-        key: edd1c9f034335f136f87ad84b625c8f1 # Default APISIX admin API key
+        key: ${{APISIX_ADMIN_KEY}}
         role: admin
-  etcd:
-    host:
-      - "http://etcd:2379" # Connect to the etcd container
-    prefix: "/apisix"
-    timeout: 30

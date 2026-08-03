@@ -8,3 +8,13 @@ plugins:
     out: .
     opt:
       - module=github.com/SirNacou/ecommerce
+
+  - remote: buf.build/connectrpc/query-es:v2.2.0
+    out: frontend/src/gen
+    opt:
+      - target=ts
+  # connectrpc/query-es depends on bufbuild/es
+  - remote: buf.build/bufbuild/es:v2.7.0
+    out: frontend/src/gen
+    opt:
+      - target=ts

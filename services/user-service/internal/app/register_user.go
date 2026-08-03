@@ -21,19 +21,19 @@ type RegisterUserResult struct {
 	}
 }
 
-type RegisterUserUseCase struct {
+type RegisterUserCommandHandler struct {
 	uow    UnitOfWork
 	hasher PasswordHasher
 }
 
-func NewRegisterUserUseCase(uow UnitOfWork, hasher PasswordHasher) *RegisterUserUseCase {
-	return &RegisterUserUseCase{
+func NewRegisterUserCommandHandler(uow UnitOfWork, hasher PasswordHasher) *RegisterUserCommandHandler {
+	return &RegisterUserCommandHandler{
 		uow:    uow,
 		hasher: hasher,
 	}
 }
 
-func (uc *RegisterUserUseCase) Execute(ctx context.Context, cmd RegisterUserCommand) (*RegisterUserResult, error) {
+func (uc *RegisterUserCommandHandler) Execute(ctx context.Context, cmd RegisterUserCommand) (*RegisterUserResult, error) {
 	if len(cmd.Password) < 6 {
 		return nil, domain.ErrPasswordTooShort
 	}

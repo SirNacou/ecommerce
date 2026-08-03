@@ -19,25 +19,25 @@ type LoginUserResult struct {
 	RefreshToken string
 }
 
-type LoginUserUseCase struct {
+type LoginUserCommandHandler struct {
 	uow           UnitOfWork
 	hasher        PasswordHasher
 	tokenProvider TokenProvider
 }
 
-func NewLoginUserUseCase(
+func NewLoginUserCommandHandler(
 	uow UnitOfWork,
 	hasher PasswordHasher,
 	tokenProvider TokenProvider,
-) *LoginUserUseCase {
-	return &LoginUserUseCase{
+) *LoginUserCommandHandler {
+	return &LoginUserCommandHandler{
 		uow:           uow,
 		hasher:        hasher,
 		tokenProvider: tokenProvider,
 	}
 }
 
-func (uc *LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResult, error) {
+func (uc *LoginUserCommandHandler) Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResult, error) {
 	var user *domain.User
 
 	err := uc.uow.Execute(ctx, func(store Store) error {
@@ -59,7 +59,7 @@ func (uc *LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (
 	}
 
 	// Generate JWT tokens
-	accToken, refToken, err := uc.tokenProvider.GenerateTokens(user.ID.String())
+	accToken, refToken, err := uc.tokenProvider.GenerateTokens(user.ID.String(), user.Email)
 	if err != nil {
 		return nil, err
 	}

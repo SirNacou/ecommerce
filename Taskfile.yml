@@ -9,3 +9,14 @@ tasks:
   default:
     cmds:
       - task --list
+
+  infra:up:
+    desc: "Start shared infrastructure (APISIX, etcd)"
+    cmds:
+      - docker compose -f docker-compose.infra.yml up -d
+
+  up:all:
+    desc: "Start entire platform"
+    cmds:
+      - task: infra:up
+      - task: users:up

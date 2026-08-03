@@ -4,16 +4,18 @@ import (
 	"errors"
 	"time"
 
+	"github.com/SirNacou/ecommerce/services/user-service/internal/app"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 var ErrInvalidToken = errors.New("invalid or expired token")
 
-type Claims struct {
-	UserID string `json:"user_id"`
+type CustomClaims struct {
+	UserID    string `json:"user_id"`
+	Email     string `json:"email,omitempty"`
+	TokenType string `json:"token_type"` // "access" or "refresh"
 	jwt.RegisteredClaims
 }
-
 type JWTProvider struct {
 	secretKey     []byte
 	accessExpiry  time.Duration
@@ -29,17 +31,15 @@ func NewJWTProvider(secretKey []byte, accessExpiry, refreshExpiry time.Duration)
 }
 
 // GenerateTokens implements [app.TokenProvider].
-func (j *JWTProvider) GenerateTokens(userID string) (accessToken string, refreshToken string, err error) {
+func (j *JWTProvider) GenerateTokens(userID, email string) (accessToken string, refreshToken string, err error) {
 	now := time.Now().UTC()
 
-	accessClaims := Claims{
-		UserID: userID,
+	accessClaims := CustomClaims{
+		UserID:    userID,
+		Email:     email,
+		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "",
-			Subject:   "",
-			Audience:  jwt.ClaimStrings{},
 			ExpiresAt: jwt.NewNumericDate(now.Add(j.accessExpiry)),
-			NotBefore: &jwt.NumericDate{},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ID:        userID,
 		},
@@ -51,8 +51,9 @@ func (j *JWTProvider) GenerateTokens(userID string) (accessToken string, refresh
 		return "", "", err
 	}
 
-	refreshClaims := Claims{
-		UserID: userID,
+	refreshClaims := CustomClaims{
+		UserID:    userID,
+		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(j.refreshExpiry)),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -69,8 +70,8 @@ func (j *JWTProvider) GenerateTokens(userID string) (accessToken string, refresh
 }
 
 // ValidateToken implements [app.TokenProvider].
-func (j *JWTProvider) ValidateToken(tokenStr string) (userID string, err error) {
-	token, err := jwt.ParseWithClaims(tokenStr, Claims{}, func(t *jwt.Token) (any, error) {
+func (j *JWTProvider) ValidateToken(tokenStr string) (*app.UserClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidToken
 		}
@@ -78,13 +79,16 @@ func (j *JWTProvider) ValidateToken(tokenStr string) (userID string, err error) 
 	})
 
 	if err != nil || !token.Valid {
-		return "", ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 
-	claims, ok := token.Claims.(*Claims)
+	claims, ok := token.Claims.(*CustomClaims)
 	if !ok {
-		return "", ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 
-	return claims.UserID, nil
+	return &app.UserClaims{
+		UserID: claims.UserID,
+		Email:  claims.Email,
+	}, nil
 }

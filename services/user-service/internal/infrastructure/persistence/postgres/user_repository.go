@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -9,6 +10,8 @@ import (
 	"github.com/SirNacou/ecommerce/services/user-service/internal/domain"
 	"github.com/SirNacou/ecommerce/services/user-service/internal/infrastructure/persistence/postgres/db"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type UserRepository struct {
 	queries *db.Queries

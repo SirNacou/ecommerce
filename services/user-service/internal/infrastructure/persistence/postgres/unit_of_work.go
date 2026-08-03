@@ -18,18 +18,18 @@ func (s *sqlcStore) Users() domain.UserRepository {
 	return s.userRepo
 }
 
-type sqlcUnitOfWork struct {
+type unitOfWork struct {
 	pool *pgxpool.Pool
 }
 
-func NewSQLCUnitOfWork(pool *pgxpool.Pool) app.UnitOfWork {
-	return &sqlcUnitOfWork{
+func NewUnitOfWork(pool *pgxpool.Pool) app.UnitOfWork {
+	return &unitOfWork{
 		pool: pool,
 	}
 }
 
 // Execute implements [app.UnitOfWork].
-func (uow *sqlcUnitOfWork) Execute(ctx context.Context, fn func(store app.Store) error) error {
+func (uow *unitOfWork) Execute(ctx context.Context, fn func(store app.Store) error) error {
 	tx, err := uow.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)

@@ -8,6 +8,11 @@ type PasswordHasher interface {
 
 // TokenProvider defines the port for generating and validating auth tokens
 type TokenProvider interface {
-	GenerateTokens(userID string) (accessToken string, refreshToken string, err error)
-	ValidateToken(tokenStr string) (userID string, err error)
+	GenerateTokens(userID, email string) (accessToken string, refreshToken string, err error)
+	ValidateToken(tokenStr string) (claims *UserClaims, err error)
+}
+
+type UserClaims struct {
+	UserID string
+	Email  string
 }
