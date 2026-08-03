@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	ErrInvalidPrice = errors.New("price must be greater than or equal to zero")
-	ErrInvalidName  = errors.New("product name cannot be empty")
-	ErrProductNotFound = errors.New("product not found")
+	ErrInvalidPrice      = errors.New("price must be greater than or equal to zero")
+	ErrInvalidName       = errors.New("product name cannot be empty")
+	ErrProductNotFound   = errors.New("product not found")
+	ErrInvalidCategoryID = errors.New("invalid category ID")
 )
 
 type ProductCreatedEvent struct {

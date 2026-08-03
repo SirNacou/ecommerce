@@ -1,4 +1,4 @@
-version: 3
+version: "3"
 
 includes:
   users:
@@ -13,17 +13,92 @@ tasks:
     cmds:
       - task --list
 
-  infra:up:
-    desc: "Start shared infrastructure (APISIX, etcd)"
+  # ===========================================================================
+  # Stack Lifecycle
+  # ===========================================================================
+  up:
+    desc: "Build and start all services and infrastructure"
     cmds:
-      - docker compose -f docker-compose.infra.yml up -d
+      - docker compose up -d --build
 
-  up:all:
-    desc: "Start entire platform"
+  down:
+    desc: "Stop and remove all running containers and networks"
     cmds:
-      - task: infra:up
-      - task: users:up
+      - docker compose down
 
+  down:v:
+    desc: "Stop containers and purge persistent volumes (full DB reset)"
+    cmds:
+      - docker compose down -v --remove-orphans
+
+  restart:
+    desc: "Restart all containers without rebuilding"
+    cmds:
+      - docker compose restart
+
+  ps:
+    desc: "Display running container statuses and port mappings"
+    cmds:
+      - docker compose ps
+
+  # ===========================================================================
+  # Selective Rebuilds
+  # ===========================================================================
+  rebuild:user:
+    desc: "Rebuild and restart user-service"
+    cmds:
+      - docker compose up -d --build user-service
+
+  rebuild:catalog:
+    desc: "Rebuild and restart catalog-service"
+    cmds:
+      - docker compose up -d --build catalog-service
+
+  rebuild:apisix:
+    desc: "Force recreate APISIX gateway (applies route/config changes)"
+    cmds:
+      - docker compose up -d --force-recreate apisix
+
+  # ===========================================================================
+  # Logs
+  # ===========================================================================
+  logs:
+    desc: "Tail logs for all services"
+    cmds:
+      - docker compose logs -f
+
+  logs:user:
+    desc: "Tail logs for user-service"
+    cmds:
+      - docker compose logs -f user-service
+
+  logs:catalog:
+    desc: "Tail logs for catalog-service"
+    cmds:
+      - docker compose logs -f catalog-service
+
+  logs:apisix:
+    desc: "Tail logs for APISIX gateway"
+    cmds:
+      - docker compose logs -f apisix
+
+  logs:db:
+    desc: "Tail logs for shared PostgreSQL"
+    cmds:
+      - docker compose logs -f postgres
+
+  # ===========================================================================
+  # Database Utilities
+  # ===========================================================================
+  db:psql:
+    desc: "Open interactive psql session in PostgreSQL container"
+    interactive: true
+    cmds:
+      - docker compose exec postgres psql -U postgres -d postgres
+
+  # ===========================================================================
+  # Code Generation
+  # ===========================================================================
   buf:generate:
     desc: "Generate code from protobuf definitions"
     cmds:

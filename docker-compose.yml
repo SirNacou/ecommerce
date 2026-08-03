@@ -1,0 +1,134 @@
+networks:
+  ecommerce-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+services:
+  # ===========================================================================
+  # 1. API Gateway (Apache APISIX in Standalone Mode)
+  # ===========================================================================
+  apisix:
+    image: apache/apisix:3.17.0-debian
+    container_name: apisix-gateway
+    ports:
+      - "${APISIX_HTTP_PORT:-9080}:9080"
+      - "${APISIX_ADMIN_PORT:-9180}:9180"
+    volumes:
+      - ./apisix_conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ./apisix_conf/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    env_file:
+      - .env
+    depends_on:
+      - user-service
+      - catalog-service
+    networks:
+      - ecommerce-net
+
+  # ===========================================================================
+  # 2. Shared PostgreSQL Engine (Hosts user_db & catalog_db)
+  # ===========================================================================
+  postgres:
+    image: postgres:18-alpine
+    container_name: shared_postgres
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./scripts/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ecommerce-net
+
+  # ===========================================================================
+  # 3. Database Migrations (Goose)
+  # ===========================================================================
+  user_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: user_migrations
+    volumes:
+      - ./services/user-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${USER_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  catalog_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: catalog_migrations
+    volumes:
+      - ./services/catalog-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${CATALOG_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  # ===========================================================================
+  # 4. Microservices
+  # ===========================================================================
+  user-service:
+    build:
+      context: . # Build context is workspace root so Docker can resolve /pkg/auth
+      dockerfile: services/user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${USER_SERVICE_PORT}"
+      DATABASE_URL: "${USER_DATABASE_URL}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net
+
+  catalog-service:
+    build:
+      context: . # Build context is workspace root so Docker can resolve /pkg/auth
+      dockerfile: services/catalog-service/Dockerfile
+    container_name: catalog-service
+    ports:
+      - "${CATALOG_SERVICE_PORT}:${CATALOG_SERVICE_PORT}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${CATALOG_SERVICE_PORT}"
+      DATABASE_URL: "${CATALOG_DATABASE_URL}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      catalog_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net

@@ -12,12 +12,12 @@ import (
 
 type CatalogHandler struct {
 	catalogv1connect.UnimplementedCatalogServiceHandler
-	createProductUC *app.CreateProductUseCase
+	createProductCmd *app.CreateProductCommandHandler
 }
 
-func NewCatalogHandler(createProductUC *app.CreateProductUseCase) *CatalogHandler {
+func NewCatalogHandler(createProductCmd *app.CreateProductCommandHandler) *CatalogHandler {
 	return &CatalogHandler{
-		createProductUC: createProductUC,
+		createProductCmd: createProductCmd,
 	}
 }
 
@@ -26,7 +26,7 @@ func (h *CatalogHandler) CreateProduct(
 	req *connect.Request[catalogv1.CreateProductRequest],
 ) (*connect.Response[catalogv1.CreateProductResponse], error) {
 
-	product, err := h.createProductUC.Execute(ctx, app.CreateProductInput{
+	product, err := h.createProductCmd.Execute(ctx, app.CreateProductInput{
 		CategoryID:    req.Msg.GetCategoryId(),
 		Name:          req.Msg.GetName(),
 		Description:   req.Msg.GetDescription(),

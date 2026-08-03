@@ -1,6 +1,7 @@
 go 1.26.5
 
 use (
+	./pkg
 	./services/catalog-service
 	./services/user-service
 )

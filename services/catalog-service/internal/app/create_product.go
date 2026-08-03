@@ -15,18 +15,18 @@ type CreateProductInput struct {
 	StockQuantity int32
 }
 
-type CreateProductUseCase struct {
+type CreateProductCommandHandler struct {
 	uow UnitOfWork
 }
 
-func NewCreateProductUseCase(uow UnitOfWork) *CreateProductUseCase {
-	return &CreateProductUseCase{uow: uow}
+func NewCreateProductCommandHandler(uow UnitOfWork) *CreateProductCommandHandler {
+	return &CreateProductCommandHandler{uow: uow}
 }
 
-func (uc *CreateProductUseCase) Execute(ctx context.Context, input CreateProductInput) (*domain.Product, error) {
+func (ch *CreateProductCommandHandler) Execute(ctx context.Context, input CreateProductInput) (*domain.Product, error) {
 	catID, err := uuid.Parse(input.CategoryID)
 	if err != nil {
-		return nil, domain.ErrInvalidName
+		return nil, domain.ErrInvalidCategoryID
 	}
 
 	product, err := domain.NewProduct(catID, input.Name, input.Description, input.PriceCents, input.StockQuantity)
@@ -34,7 +34,7 @@ func (uc *CreateProductUseCase) Execute(ctx context.Context, input CreateProduct
 		return nil, err
 	}
 
-	err = uc.uow.Execute(ctx, func(store CatalogStore) error {
+	err = ch.uow.Execute(ctx, func(store CatalogStore) error {
 		return store.CreateProduct(ctx, product)
 	})
 	if err != nil {

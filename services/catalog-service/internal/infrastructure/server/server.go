@@ -13,11 +13,11 @@ import (
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/SirNacou/ecommerce/pkg/auth"
 	catalogv1 "github.com/SirNacou/ecommerce/services/catalog-service/gen/v1/catalogv1connect"
 	"github.com/SirNacou/ecommerce/services/catalog-service/internal/app"
 	"github.com/SirNacou/ecommerce/services/catalog-service/internal/infrastructure/config"
 	"github.com/SirNacou/ecommerce/services/catalog-service/internal/infrastructure/persistence/postgres"
-	"github.com/SirNacou/ecommerce/services/catalog-service/internal/infrastructure/security"
 	grpcport "github.com/SirNacou/ecommerce/services/catalog-service/internal/ports/grpc"
 )
 
@@ -38,16 +38,23 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 		return nil, fmt.Errorf("postgres ping failed: %w", err)
 	}
 
-	// 1. Infrastructure Adapters
+	// 1. Adapters & Unit of Work
 	uow := postgres.NewUnitOfWork(pool)
-	tokenProvider := security.NewJWTProvider([]byte(cfg.JWTSecret), 15*time.Minute, 7*24*time.Hour)
 
-	// 2. Application Command & Query Handlers (CQRS)
+	// 2. CQRS Command Handlers
 	createProductCmd := app.NewCreateProductCommandHandler(uow)
 
-	// 3. Transport Handler & Auth Interceptor
+	// 3. Auth Interceptor Setup (using shared pkg/auth)
+	validator := auth.NewJWTValidator(cfg.JWTSecret)
+	publicEndpoints := map[string]bool{
+		"/catalog.v1.CatalogService/ListProducts":   true,
+		"/catalog.v1.CatalogService/GetProduct":     true,
+		"/catalog.v1.CatalogService/ListCategories": true,
+	}
+	authInterceptor := auth.NewConnectInterceptor(validator, publicEndpoints)
+
+	// 4. Transport Handler & ServeMux Routing
 	catalogHandler := grpcport.NewCatalogHandler(createProductCmd)
-	authInterceptor := grpcport.NewAuthInterceptor(tokenProvider)
 
 	mux := http.NewServeMux()
 	path, handler := catalogv1.NewCatalogServiceHandler(
@@ -56,13 +63,13 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	)
 	mux.Handle(path, handler)
 
-	// Health check endpoint
+	// Health Check Endpoint
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
-	// 4. Native HTTP/1.1 & Unencrypted HTTP/2 Protocols (Go 1.22+)
+	// 5. HTTP Protocol Configuration (Go 1.22+)
 	protocols := new(http.Protocols)
 	protocols.SetHTTP1(true)
 	protocols.SetUnencryptedHTTP2(true)
