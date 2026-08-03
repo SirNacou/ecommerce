@@ -1,0 +1,37 @@
+# Version control
+.git
+.gitignore
+
+# Operating system and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Local build artifacts, test outputs, and binaries
+bin/
+dist/
+tmp/
+*.exe
+*.out
+*.test
+*.prof
+coverage.txt
+
+# Local orchestration, tasks, and documentation
+docker-compose*.yml
+Taskfile*.yml
+README.md
+docs/
+scripts/
+
+# CI/CD workflows
+.github/
