@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/SirNacou/ecommerce/services/user-service/internal/infrastructure/config"
-	"github.com/SirNacou/ecommerce/services/user-service/internal/server"
+	"github.com/SirNacou/ecommerce/services/user-service/internal/infrastructure/server"
 )
 
 func main() {

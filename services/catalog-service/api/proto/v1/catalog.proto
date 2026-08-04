@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package catalog.v1;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/SirNacou/ecommerce/services/catalog-service/gen/v1;catalogv1";
 
 service CatalogService {
@@ -23,9 +25,9 @@ message Product {
   string category_id = 2;
   string name = 3;
   string description = 4;
-  int64 price_cents = 5; // Stored in smallest currency unit (cents) to avoid floating point errors
+  int64 price_cents = 5;
   int32 stock_quantity = 6;
-  string created_at = 7;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message CreateCategoryRequest {

@@ -43,6 +43,10 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 
 	// 2. CQRS Command Handlers
 	createProductCmd := app.NewCreateProductCommandHandler(uow)
+	getProductQry := app.NewGetProductQueryHandler(uow)
+	listProductsQry := app.NewListProductsQueryHandler(uow)
+	createCategoryCmd := app.NewCreateCategoryCommandHandler(uow)
+	listCategoriesQry := app.NewListCategoriesQueryHandler(uow)
 
 	// 3. Auth Interceptor Setup (using shared pkg/auth)
 	validator := auth.NewJWTValidator(cfg.JWTSecret)
@@ -54,7 +58,7 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	authInterceptor := auth.NewConnectInterceptor(validator, publicEndpoints)
 
 	// 4. Transport Handler & ServeMux Routing
-	catalogHandler := grpcport.NewCatalogHandler(createProductCmd)
+	catalogHandler := grpcport.NewCatalogHandler(createProductCmd, getProductQry, listProductsQry, createCategoryCmd, listCategoriesQry)
 
 	mux := http.NewServeMux()
 	path, handler := catalogv1.NewCatalogServiceHandler(

@@ -11,9 +11,9 @@ import (
 )
 
 type Querier interface {
-	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
-	CreateOutboxEvent(ctx context.Context, arg CreateOutboxEventParams) (OutboxEvent, error)
-	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
+	CreateProduct(ctx context.Context, arg CreateProductParams) error
+	GetCategoryByID(ctx context.Context, id uuid.UUID) (Category, error)
 	GetProductByID(ctx context.Context, id uuid.UUID) (Product, error)
 	ListCategories(ctx context.Context) ([]Category, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)

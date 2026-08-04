@@ -7,24 +7,71 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-const createCategory = `-- name: CreateCategory :one
-INSERT INTO categories (id, name, slug)
-VALUES ($1, $2, $3)
-RETURNING id, name, slug, created_at
+const createCategory = `-- name: CreateCategory :exec
+INSERT INTO categories (id, name, slug, created_at)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateCategoryParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-	Slug string    `json:"slug"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Slug      string    `json:"slug"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, createCategory, arg.ID, arg.Name, arg.Slug)
+func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) error {
+	_, err := q.db.Exec(ctx, createCategory,
+		arg.ID,
+		arg.Name,
+		arg.Slug,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const createProduct = `-- name: CreateProduct :exec
+INSERT INTO products (id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+`
+
+type CreateProductParams struct {
+	ID            uuid.UUID `json:"id"`
+	CategoryID    uuid.UUID `json:"category_id"`
+	Name          string    `json:"name"`
+	Description   string    `json:"description"`
+	PriceCents    int64     `json:"price_cents"`
+	StockQuantity int32     `json:"stock_quantity"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) error {
+	_, err := q.db.Exec(ctx, createProduct,
+		arg.ID,
+		arg.CategoryID,
+		arg.Name,
+		arg.Description,
+		arg.PriceCents,
+		arg.StockQuantity,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const getCategoryByID = `-- name: GetCategoryByID :one
+SELECT id, name, slug, created_at
+FROM categories
+WHERE id = $1
+`
+
+func (q *Queries) GetCategoryByID(ctx context.Context, id uuid.UUID) (Category, error) {
+	row := q.db.QueryRow(ctx, getCategoryByID, id)
 	var i Category
 	err := row.Scan(
 		&i.ID,
@@ -35,82 +82,10 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 	return i, err
 }
 
-const createOutboxEvent = `-- name: CreateOutboxEvent :one
-INSERT INTO outbox_events (id, aggregate_type, aggregate_id, event_type, payload)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, aggregate_type, aggregate_id, event_type, payload, status, created_at, processed_at
-`
-
-type CreateOutboxEventParams struct {
-	ID            uuid.UUID `json:"id"`
-	AggregateType string    `json:"aggregate_type"`
-	AggregateID   string    `json:"aggregate_id"`
-	EventType     string    `json:"event_type"`
-	Payload       []byte    `json:"payload"`
-}
-
-func (q *Queries) CreateOutboxEvent(ctx context.Context, arg CreateOutboxEventParams) (OutboxEvent, error) {
-	row := q.db.QueryRow(ctx, createOutboxEvent,
-		arg.ID,
-		arg.AggregateType,
-		arg.AggregateID,
-		arg.EventType,
-		arg.Payload,
-	)
-	var i OutboxEvent
-	err := row.Scan(
-		&i.ID,
-		&i.AggregateType,
-		&i.AggregateID,
-		&i.EventType,
-		&i.Payload,
-		&i.Status,
-		&i.CreatedAt,
-		&i.ProcessedAt,
-	)
-	return i, err
-}
-
-const createProduct = `-- name: CreateProduct :one
-INSERT INTO products (id, category_id, name, description, price_cents, stock_quantity)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at
-`
-
-type CreateProductParams struct {
-	ID            uuid.UUID `json:"id"`
-	CategoryID    uuid.UUID `json:"category_id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	PriceCents    int64     `json:"price_cents"`
-	StockQuantity int32     `json:"stock_quantity"`
-}
-
-func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
-	row := q.db.QueryRow(ctx, createProduct,
-		arg.ID,
-		arg.CategoryID,
-		arg.Name,
-		arg.Description,
-		arg.PriceCents,
-		arg.StockQuantity,
-	)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.CategoryID,
-		&i.Name,
-		&i.Description,
-		&i.PriceCents,
-		&i.StockQuantity,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getProductByID = `-- name: GetProductByID :one
-SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at FROM products WHERE id = $1
+SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at
+FROM products
+WHERE id = $1
 `
 
 func (q *Queries) GetProductByID(ctx context.Context, id uuid.UUID) (Product, error) {
@@ -130,7 +105,9 @@ func (q *Queries) GetProductByID(ctx context.Context, id uuid.UUID) (Product, er
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, slug, created_at FROM categories ORDER BY name ASC
+SELECT id, name, slug, created_at
+FROM categories
+ORDER BY name ASC
 `
 
 func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
@@ -159,19 +136,21 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at FROM products
-WHERE ($2::uuid IS NULL OR category_id = $2)
+SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at
+FROM products
+WHERE ($3::uuid IS NULL OR category_id = $3)
 ORDER BY created_at DESC
-LIMIT $1
+LIMIT $1 OFFSET $2
 `
 
 type ListProductsParams struct {
 	Limit      int32      `json:"limit"`
+	Offset     int32      `json:"offset"`
 	CategoryID *uuid.UUID `json:"category_id"`
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
-	rows, err := q.db.Query(ctx, listProducts, arg.Limit, arg.CategoryID)
+	rows, err := q.db.Query(ctx, listProducts, arg.Limit, arg.Offset, arg.CategoryID)
 	if err != nil {
 		return nil, err
 	}

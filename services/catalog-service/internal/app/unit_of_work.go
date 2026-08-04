@@ -10,7 +10,10 @@ import (
 type CatalogStore interface {
 	CreateProduct(ctx context.Context, product *domain.Product) error
 	GetProductByID(ctx context.Context, id uuid.UUID) (*domain.Product, error)
-	ListProducts(ctx context.Context, categoryID *uuid.UUID, limit int32) ([]*domain.Product, error)
+	ListProducts(ctx context.Context, categoryID *uuid.UUID, limit, offset int32) ([]*domain.Product, error)
+	CreateCategory(ctx context.Context, category *domain.Category) error
+	GetCategoryByID(ctx context.Context, id uuid.UUID) (*domain.Category, error)
+	ListCategories(ctx context.Context) ([]*domain.Category, error)
 }
 
 type UnitOfWork interface {

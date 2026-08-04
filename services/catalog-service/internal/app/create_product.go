@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateProductInput struct {
+type CreateProductCommand struct {
 	CategoryID    string
 	Name          string
 	Description   string
@@ -23,18 +23,24 @@ func NewCreateProductCommandHandler(uow UnitOfWork) *CreateProductCommandHandler
 	return &CreateProductCommandHandler{uow: uow}
 }
 
-func (ch *CreateProductCommandHandler) Execute(ctx context.Context, input CreateProductInput) (*domain.Product, error) {
-	catID, err := uuid.Parse(input.CategoryID)
+func (h *CreateProductCommandHandler) Handle(ctx context.Context, cmd CreateProductCommand) (*domain.Product, error) {
+	categoryID, err := uuid.Parse(cmd.CategoryID)
 	if err != nil {
-		return nil, domain.ErrInvalidCategoryID
+		return nil, domain.ErrCategoryNotFound
 	}
 
-	product, err := domain.NewProduct(catID, input.Name, input.Description, input.PriceCents, input.StockQuantity)
+	product, err := domain.NewProduct(
+		categoryID,
+		cmd.Name,
+		cmd.Description,
+		cmd.PriceCents,
+		cmd.StockQuantity,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	err = ch.uow.Execute(ctx, func(store CatalogStore) error {
+	err = h.uow.Execute(ctx, func(store CatalogStore) error {
 		return store.CreateProduct(ctx, product)
 	})
 	if err != nil {

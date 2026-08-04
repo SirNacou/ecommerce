@@ -9,6 +9,7 @@ package catalogv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -87,9 +88,9 @@ type Product struct {
 	CategoryId    string                 `protobuf:"bytes,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	PriceCents    int64                  `protobuf:"varint,5,opt,name=price_cents,json=priceCents,proto3" json:"price_cents,omitempty"` // Stored in smallest currency unit (cents) to avoid floating point errors
+	PriceCents    int64                  `protobuf:"varint,5,opt,name=price_cents,json=priceCents,proto3" json:"price_cents,omitempty"`
 	StockQuantity int32                  `protobuf:"varint,6,opt,name=stock_quantity,json=stockQuantity,proto3" json:"stock_quantity,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -166,11 +167,11 @@ func (x *Product) GetStockQuantity() int32 {
 	return 0
 }
 
-func (x *Product) GetCreatedAt() string {
+func (x *Product) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
-	return ""
+	return nil
 }
 
 type CreateCategoryRequest struct {
@@ -674,11 +675,11 @@ var File_v1_catalog_proto protoreflect.FileDescriptor
 const file_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"\x10v1/catalog.proto\x12\n" +
-	"catalog.v1\"B\n" +
+	"catalog.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"B\n" +
 	"\bCategory\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04slug\x18\x03 \x01(\tR\x04slug\"\xd7\x01\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\"\xf3\x01\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
 	"\vcategory_id\x18\x02 \x01(\tR\n" +
@@ -687,9 +688,9 @@ const file_v1_catalog_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1f\n" +
 	"\vprice_cents\x18\x05 \x01(\x03R\n" +
 	"priceCents\x12%\n" +
-	"\x0estock_quantity\x18\x06 \x01(\x05R\rstockQuantity\x12\x1d\n" +
+	"\x0estock_quantity\x18\x06 \x01(\x05R\rstockQuantity\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"?\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"?\n" +
 	"\x15CreateCategoryRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\"J\n" +
@@ -757,28 +758,30 @@ var file_v1_catalog_proto_goTypes = []any{
 	(*GetProductResponse)(nil),     // 9: catalog.v1.GetProductResponse
 	(*ListProductsRequest)(nil),    // 10: catalog.v1.ListProductsRequest
 	(*ListProductsResponse)(nil),   // 11: catalog.v1.ListProductsResponse
+	(*timestamppb.Timestamp)(nil),  // 12: google.protobuf.Timestamp
 }
 var file_v1_catalog_proto_depIdxs = []int32{
-	0,  // 0: catalog.v1.CreateCategoryResponse.category:type_name -> catalog.v1.Category
-	0,  // 1: catalog.v1.ListCategoriesResponse.categories:type_name -> catalog.v1.Category
-	1,  // 2: catalog.v1.CreateProductResponse.product:type_name -> catalog.v1.Product
-	1,  // 3: catalog.v1.GetProductResponse.product:type_name -> catalog.v1.Product
-	1,  // 4: catalog.v1.ListProductsResponse.products:type_name -> catalog.v1.Product
-	2,  // 5: catalog.v1.CatalogService.CreateCategory:input_type -> catalog.v1.CreateCategoryRequest
-	4,  // 6: catalog.v1.CatalogService.ListCategories:input_type -> catalog.v1.ListCategoriesRequest
-	6,  // 7: catalog.v1.CatalogService.CreateProduct:input_type -> catalog.v1.CreateProductRequest
-	8,  // 8: catalog.v1.CatalogService.GetProduct:input_type -> catalog.v1.GetProductRequest
-	10, // 9: catalog.v1.CatalogService.ListProducts:input_type -> catalog.v1.ListProductsRequest
-	3,  // 10: catalog.v1.CatalogService.CreateCategory:output_type -> catalog.v1.CreateCategoryResponse
-	5,  // 11: catalog.v1.CatalogService.ListCategories:output_type -> catalog.v1.ListCategoriesResponse
-	7,  // 12: catalog.v1.CatalogService.CreateProduct:output_type -> catalog.v1.CreateProductResponse
-	9,  // 13: catalog.v1.CatalogService.GetProduct:output_type -> catalog.v1.GetProductResponse
-	11, // 14: catalog.v1.CatalogService.ListProducts:output_type -> catalog.v1.ListProductsResponse
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	12, // 0: catalog.v1.Product.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 1: catalog.v1.CreateCategoryResponse.category:type_name -> catalog.v1.Category
+	0,  // 2: catalog.v1.ListCategoriesResponse.categories:type_name -> catalog.v1.Category
+	1,  // 3: catalog.v1.CreateProductResponse.product:type_name -> catalog.v1.Product
+	1,  // 4: catalog.v1.GetProductResponse.product:type_name -> catalog.v1.Product
+	1,  // 5: catalog.v1.ListProductsResponse.products:type_name -> catalog.v1.Product
+	2,  // 6: catalog.v1.CatalogService.CreateCategory:input_type -> catalog.v1.CreateCategoryRequest
+	4,  // 7: catalog.v1.CatalogService.ListCategories:input_type -> catalog.v1.ListCategoriesRequest
+	6,  // 8: catalog.v1.CatalogService.CreateProduct:input_type -> catalog.v1.CreateProductRequest
+	8,  // 9: catalog.v1.CatalogService.GetProduct:input_type -> catalog.v1.GetProductRequest
+	10, // 10: catalog.v1.CatalogService.ListProducts:input_type -> catalog.v1.ListProductsRequest
+	3,  // 11: catalog.v1.CatalogService.CreateCategory:output_type -> catalog.v1.CreateCategoryResponse
+	5,  // 12: catalog.v1.CatalogService.ListCategories:output_type -> catalog.v1.ListCategoriesResponse
+	7,  // 13: catalog.v1.CatalogService.CreateProduct:output_type -> catalog.v1.CreateProductResponse
+	9,  // 14: catalog.v1.CatalogService.GetProduct:output_type -> catalog.v1.GetProductResponse
+	11, // 15: catalog.v1.CatalogService.ListProducts:output_type -> catalog.v1.ListProductsResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_v1_catalog_proto_init() }
