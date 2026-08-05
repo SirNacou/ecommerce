@@ -9,6 +9,7 @@ option go_package = "github.com/SirNacou/ecommerce/services/notification-service
 service NotificationService {
   rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
   rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
 }
 
 enum Channel {
@@ -47,4 +48,14 @@ message GetNotificationRequest {
 
 message GetNotificationResponse {
   Notification notification = 1;
+}
+
+message ListNotificationsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
+  string next_page_token = 2;
 }

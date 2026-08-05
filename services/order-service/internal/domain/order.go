@@ -55,6 +55,17 @@ type OrderCancelledEvent struct {
 func (e OrderCancelledEvent) EventType() string     { return "OrderCancelled" }
 func (e OrderCancelledEvent) OccurredAt() time.Time { return e.Timestamp }
 
+type OrderPaidEvent struct {
+	OrderID      string    `json:"order_id"`
+	UserID       string    `json:"user_id"`
+	TotalCents   int64     `json:"total_cents"`
+	TransactionID string   `json:"transaction_id"`
+	Timestamp    time.Time `json:"timestamp"`
+}
+
+func (e OrderPaidEvent) EventType() string     { return "OrderPaid" }
+func (e OrderPaidEvent) OccurredAt() time.Time { return e.Timestamp }
+
 func NewOrder(userID uuid.UUID, itemInputs []struct {
 	ProductID  uuid.UUID
 	Quantity   int32
@@ -124,6 +135,29 @@ func (o *Order) Cancel(reason string) error {
 		UserID:    o.UserID.String(),
 		Reason:    reason,
 		Timestamp: now,
+	})
+
+	return nil
+}
+
+func (o *Order) MarkAsPaid(transactionID string) error {
+	if o.Status == StatusPaid {
+		return nil
+	}
+	if o.Status == StatusCancelled {
+		return ErrCannotMarkPaidCancelled
+	}
+
+	now := time.Now().UTC()
+	o.Status = StatusPaid
+	o.UpdatedAt = now
+
+	o.RecordEvent(OrderPaidEvent{
+		OrderID:       o.ID.String(),
+		UserID:        o.UserID.String(),
+		TotalCents:    o.TotalCents,
+		TransactionID: transactionID,
+		Timestamp:     now,
 	})
 
 	return nil

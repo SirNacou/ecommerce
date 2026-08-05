@@ -45,13 +45,14 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	uow := postgres.NewUnitOfWork(pool)
 	sendCmd := app.NewSendNotificationCommandHandler(uow)
 	getQry := app.NewGetNotificationQueryHandler(uow)
+	listQry := app.NewListNotificationsQueryHandler(uow)
 	consumer := app.NewOrderCreatedConsumer(sendCmd)
 
 	validator := auth.NewJWTValidator(cfg.JWTSecret)
 	publicEndpoints := map[string]bool{}
 	authInterceptor := auth.NewConnectInterceptor(validator, publicEndpoints)
 
-	handler := grpcport.NewNotificationHandler(sendCmd, getQry)
+	handler := grpcport.NewNotificationHandler(sendCmd, getQry, listQry)
 
 	mux := http.NewServeMux()
 	path, connectHandler := notificationv1.NewNotificationServiceHandler(

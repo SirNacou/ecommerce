@@ -304,3 +304,18 @@ services:
         condition: service_completed_successfully
     networks:
       - ecommerce-net
+
+  # ===========================================================================
+  # Frontend (React SPA)
+  # ===========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "${FRONTEND_PORT:-8088}:80"
+    depends_on:
+      - apisix
+    networks:
+      - ecommerce-net

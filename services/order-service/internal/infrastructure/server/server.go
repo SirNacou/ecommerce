@@ -24,11 +24,12 @@ import (
 )
 
 type Server struct {
-	cfg         config.EnvConfig
-	pool        *pgxpool.Pool
-	server      *http.Server
-	bus         *eventbus.Bus
-	dispatcher  *eventbus.Dispatcher
+	cfg                    config.EnvConfig
+	pool                   *pgxpool.Pool
+	server                 *http.Server
+	bus                    *eventbus.Bus
+	dispatcher             *eventbus.Dispatcher
+	paymentProcessedConsumer *app.PaymentProcessedConsumer
 }
 
 func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
@@ -53,6 +54,7 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	getOrderQry := app.NewGetOrderQueryHandler(uow)
 	listOrdersQry := app.NewListOrdersQueryHandler(uow)
 	cancelOrderCmd := app.NewCancelOrderCommandHandler(uow)
+	paymentProcessedConsumer := app.NewPaymentProcessedConsumer(uow)
 
 	// 3. Auth Interceptor (pkg/auth)
 	validator := auth.NewJWTValidator(cfg.JWTSecret)
@@ -87,9 +89,10 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	}
 
 	srv := &Server{
-		cfg:    cfg,
-		pool:   pool,
-		server: httpServer,
+		cfg:                      cfg,
+		pool:                     pool,
+		server:                   httpServer,
+		paymentProcessedConsumer: paymentProcessedConsumer,
 	}
 
 	// Event bus + outbox dispatcher
@@ -116,6 +119,12 @@ func (s *Server) Run(ctx context.Context) error {
 	if s.dispatcher != nil {
 		if err := s.dispatcher.Start(ctx); err != nil {
 			return fmt.Errorf("failed to start outbox dispatcher: %w", err)
+		}
+	}
+
+	if s.bus != nil && s.paymentProcessedConsumer != nil {
+		if err := s.bus.Subscribe(ctx, "payments", "payments.PaymentProcessed", "order-payment-processed", s.paymentProcessedConsumer.Handle); err != nil {
+			return fmt.Errorf("failed to subscribe to payment events: %w", err)
 		}
 	}
 

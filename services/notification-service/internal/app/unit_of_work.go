@@ -10,6 +10,7 @@ import (
 type NotificationStore interface {
 	CreateNotification(ctx context.Context, n *domain.Notification) error
 	GetNotificationByID(ctx context.Context, id uuid.UUID) (*domain.Notification, error)
+	ListNotificationsByUserID(ctx context.Context, userID uuid.UUID, limit, offset int32) ([]*domain.Notification, error)
 	UpdateNotificationStatus(ctx context.Context, id uuid.UUID, status domain.NotificationStatus) error
 	SaveOutboxEvent(ctx context.Context, aggregateType, aggregateID, eventType string, payload []byte) error
 }

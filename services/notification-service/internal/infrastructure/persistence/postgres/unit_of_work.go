@@ -88,6 +88,34 @@ func (s *notificationStore) GetNotificationByID(ctx context.Context, id uuid.UUI
 	}, nil
 }
 
+func (s *notificationStore) ListNotificationsByUserID(ctx context.Context, userID uuid.UUID, limit, offset int32) ([]*domain.Notification, error) {
+	rows, err := s.queries.ListNotificationsByUserID(ctx, db.ListNotificationsByUserIDParams{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	notifications := make([]*domain.Notification, 0, len(rows))
+	for _, row := range rows {
+		notifications = append(notifications, &domain.Notification{
+			ID:        row.ID,
+			UserID:    row.UserID,
+			Channel:   domain.Channel(row.Channel),
+			Recipient: row.Recipient,
+			Subject:   row.Subject,
+			Body:      row.Body,
+			Status:    domain.NotificationStatus(row.Status),
+			CreatedAt: row.CreatedAt,
+			UpdatedAt: row.UpdatedAt,
+		})
+	}
+
+	return notifications, nil
+}
+
 func (s *notificationStore) UpdateNotificationStatus(ctx context.Context, id uuid.UUID, status domain.NotificationStatus) error {
 	return s.queries.UpdateNotificationStatus(ctx, db.UpdateNotificationStatusParams{
 		ID:        id,

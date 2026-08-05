@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/notification.proto.
  */
 export const file_v1_notification: GenFile = /*@__PURE__*/
-  fileDesc("ChV2MS9ub3RpZmljYXRpb24ucHJvdG8SD25vdGlmaWNhdGlvbi52MSLIAQoMTm90aWZpY2F0aW9uEgoKAmlkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSKQoHY2hhbm5lbBgDIAEoDjIYLm5vdGlmaWNhdGlvbi52MS5DaGFubmVsEhEKCXJlY2lwaWVudBgEIAEoCRIPCgdzdWJqZWN0GAUgASgJEgwKBGJvZHkYBiABKAkSDgoGc3RhdHVzGAcgASgJEi4KCmNyZWF0ZWRfYXQYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIocBChdTZW5kTm90aWZpY2F0aW9uUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEikKB2NoYW5uZWwYAiABKA4yGC5ub3RpZmljYXRpb24udjEuQ2hhbm5lbBIRCglyZWNpcGllbnQYAyABKAkSDwoHc3ViamVjdBgEIAEoCRIMCgRib2R5GAUgASgJIk8KGFNlbmROb3RpZmljYXRpb25SZXNwb25zZRIzCgxub3RpZmljYXRpb24YASABKAsyHS5ub3RpZmljYXRpb24udjEuTm90aWZpY2F0aW9uIiQKFkdldE5vdGlmaWNhdGlvblJlcXVlc3QSCgoCaWQYASABKAkiTgoXR2V0Tm90aWZpY2F0aW9uUmVzcG9uc2USMwoMbm90aWZpY2F0aW9uGAEgASgLMh0ubm90aWZpY2F0aW9uLnYxLk5vdGlmaWNhdGlvbipYCgdDaGFubmVsEhcKE0NIQU5ORUxfVU5TUEVDSUZJRUQQABIRCg1DSEFOTkVMX0VNQUlMEAESDwoLQ0hBTk5FTF9TTVMQAhIQCgxDSEFOTkVMX1BVU0gQAzLkAQoTTm90aWZpY2F0aW9uU2VydmljZRJnChBTZW5kTm90aWZpY2F0aW9uEigubm90aWZpY2F0aW9uLnYxLlNlbmROb3RpZmljYXRpb25SZXF1ZXN0Gikubm90aWZpY2F0aW9uLnYxLlNlbmROb3RpZmljYXRpb25SZXNwb25zZRJkCg9HZXROb3RpZmljYXRpb24SJy5ub3RpZmljYXRpb24udjEuR2V0Tm90aWZpY2F0aW9uUmVxdWVzdBooLm5vdGlmaWNhdGlvbi52MS5HZXROb3RpZmljYXRpb25SZXNwb25zZUJTWlFnaXRodWIuY29tL1Npck5hY291L2Vjb21tZXJjZS9zZXJ2aWNlcy9ub3RpZmljYXRpb24tc2VydmljZS9nZW4vdjE7bm90aWZpY2F0aW9udjFiBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("ChV2MS9ub3RpZmljYXRpb24ucHJvdG8SD25vdGlmaWNhdGlvbi52MSLIAQoMTm90aWZpY2F0aW9uEgoKAmlkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSKQoHY2hhbm5lbBgDIAEoDjIYLm5vdGlmaWNhdGlvbi52MS5DaGFubmVsEhEKCXJlY2lwaWVudBgEIAEoCRIPCgdzdWJqZWN0GAUgASgJEgwKBGJvZHkYBiABKAkSDgoGc3RhdHVzGAcgASgJEi4KCmNyZWF0ZWRfYXQYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIocBChdTZW5kTm90aWZpY2F0aW9uUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEikKB2NoYW5uZWwYAiABKA4yGC5ub3RpZmljYXRpb24udjEuQ2hhbm5lbBIRCglyZWNpcGllbnQYAyABKAkSDwoHc3ViamVjdBgEIAEoCRIMCgRib2R5GAUgASgJIk8KGFNlbmROb3RpZmljYXRpb25SZXNwb25zZRIzCgxub3RpZmljYXRpb24YASABKAsyHS5ub3RpZmljYXRpb24udjEuTm90aWZpY2F0aW9uIiQKFkdldE5vdGlmaWNhdGlvblJlcXVlc3QSCgoCaWQYASABKAkiTgoXR2V0Tm90aWZpY2F0aW9uUmVzcG9uc2USMwoMbm90aWZpY2F0aW9uGAEgASgLMh0ubm90aWZpY2F0aW9uLnYxLk5vdGlmaWNhdGlvbiJBChhMaXN0Tm90aWZpY2F0aW9uc1JlcXVlc3QSEQoJcGFnZV9zaXplGAEgASgFEhIKCnBhZ2VfdG9rZW4YAiABKAkiagoZTGlzdE5vdGlmaWNhdGlvbnNSZXNwb25zZRI0Cg1ub3RpZmljYXRpb25zGAEgAygLMh0ubm90aWZpY2F0aW9uLnYxLk5vdGlmaWNhdGlvbhIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkqWAoHQ2hhbm5lbBIXChNDSEFOTkVMX1VOU1BFQ0lGSUVEEAASEQoNQ0hBTk5FTF9FTUFJTBABEg8KC0NIQU5ORUxfU01TEAISEAoMQ0hBTk5FTF9QVVNIEAMy0AIKE05vdGlmaWNhdGlvblNlcnZpY2USZwoQU2VuZE5vdGlmaWNhdGlvbhIoLm5vdGlmaWNhdGlvbi52MS5TZW5kTm90aWZpY2F0aW9uUmVxdWVzdBopLm5vdGlmaWNhdGlvbi52MS5TZW5kTm90aWZpY2F0aW9uUmVzcG9uc2USZAoPR2V0Tm90aWZpY2F0aW9uEicubm90aWZpY2F0aW9uLnYxLkdldE5vdGlmaWNhdGlvblJlcXVlc3QaKC5ub3RpZmljYXRpb24udjEuR2V0Tm90aWZpY2F0aW9uUmVzcG9uc2USagoRTGlzdE5vdGlmaWNhdGlvbnMSKS5ub3RpZmljYXRpb24udjEuTGlzdE5vdGlmaWNhdGlvbnNSZXF1ZXN0Gioubm90aWZpY2F0aW9uLnYxLkxpc3ROb3RpZmljYXRpb25zUmVzcG9uc2VCU1pRZ2l0aHViLmNvbS9TaXJOYWNvdS9lY29tbWVyY2Uvc2VydmljZXMvbm90aWZpY2F0aW9uLXNlcnZpY2UvZ2VuL3YxO25vdGlmaWNhdGlvbnYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message notification.v1.Notification
@@ -155,6 +155,50 @@ export const GetNotificationResponseSchema: GenMessage<GetNotificationResponse> 
   messageDesc(file_v1_notification, 4);
 
 /**
+ * @generated from message notification.v1.ListNotificationsRequest
+ */
+export type ListNotificationsRequest = Message<"notification.v1.ListNotificationsRequest"> & {
+  /**
+   * @generated from field: int32 page_size = 1;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: string page_token = 2;
+   */
+  pageToken: string;
+};
+
+/**
+ * Describes the message notification.v1.ListNotificationsRequest.
+ * Use `create(ListNotificationsRequestSchema)` to create a new message.
+ */
+export const ListNotificationsRequestSchema: GenMessage<ListNotificationsRequest> = /*@__PURE__*/
+  messageDesc(file_v1_notification, 5);
+
+/**
+ * @generated from message notification.v1.ListNotificationsResponse
+ */
+export type ListNotificationsResponse = Message<"notification.v1.ListNotificationsResponse"> & {
+  /**
+   * @generated from field: repeated notification.v1.Notification notifications = 1;
+   */
+  notifications: Notification[];
+
+  /**
+   * @generated from field: string next_page_token = 2;
+   */
+  nextPageToken: string;
+};
+
+/**
+ * Describes the message notification.v1.ListNotificationsResponse.
+ * Use `create(ListNotificationsResponseSchema)` to create a new message.
+ */
+export const ListNotificationsResponseSchema: GenMessage<ListNotificationsResponse> = /*@__PURE__*/
+  messageDesc(file_v1_notification, 6);
+
+/**
  * @generated from enum notification.v1.Channel
  */
 export enum Channel {
@@ -204,6 +248,14 @@ export const NotificationService: GenService<{
     methodKind: "unary";
     input: typeof GetNotificationRequestSchema;
     output: typeof GetNotificationResponseSchema;
+  },
+  /**
+   * @generated from rpc notification.v1.NotificationService.ListNotifications
+   */
+  listNotifications: {
+    methodKind: "unary";
+    input: typeof ListNotificationsRequestSchema;
+    output: typeof ListNotificationsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_v1_notification, 0);

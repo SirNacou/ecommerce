@@ -47,7 +47,8 @@ func (uc *RegisterUserCommandHandler) Execute(ctx context.Context, cmd RegisterU
 
 	// Execute inside transactional Unit of Work
 	err = uc.uow.Execute(ctx, func(store Store) error {
-		// NewUser creates aggregate root & records UserRegisteredEvent
+		// NewUser creates aggregate root & records UserRegisteredEvent.
+		// The password hash is computed in the application layer.
 		user, err := domain.NewUser(cmd.Email, hashedPassword, cmd.Name)
 		if err != nil {
 			return err

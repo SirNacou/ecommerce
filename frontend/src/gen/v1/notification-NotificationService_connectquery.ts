@@ -13,3 +13,8 @@ export const sendNotification = NotificationService.method.sendNotification;
  * @generated from rpc notification.v1.NotificationService.GetNotification
  */
 export const getNotification = NotificationService.method.getNotification;
+
+/**
+ * @generated from rpc notification.v1.NotificationService.ListNotifications
+ */
+export const listNotifications = NotificationService.method.listNotifications;

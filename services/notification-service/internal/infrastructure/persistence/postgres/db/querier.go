@@ -15,6 +15,7 @@ type Querier interface {
 	GetNotificationByID(ctx context.Context, id uuid.UUID) (Notification, error)
 	GetPendingOutboxEvents(ctx context.Context, limit int32) ([]OutboxEvent, error)
 	InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventParams) error
+	ListNotificationsByUserID(ctx context.Context, arg ListNotificationsByUserIDParams) ([]Notification, error)
 	MarkOutboxEventProcessed(ctx context.Context, id uuid.UUID) error
 	UpdateNotificationStatus(ctx context.Context, arg UpdateNotificationStatusParams) error
 }

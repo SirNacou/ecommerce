@@ -39,12 +39,16 @@ const (
 	// NotificationServiceGetNotificationProcedure is the fully-qualified name of the
 	// NotificationService's GetNotification RPC.
 	NotificationServiceGetNotificationProcedure = "/notification.v1.NotificationService/GetNotification"
+	// NotificationServiceListNotificationsProcedure is the fully-qualified name of the
+	// NotificationService's ListNotifications RPC.
+	NotificationServiceListNotificationsProcedure = "/notification.v1.NotificationService/ListNotifications"
 )
 
 // NotificationServiceClient is a client for the notification.v1.NotificationService service.
 type NotificationServiceClient interface {
 	SendNotification(context.Context, *connect.Request[v1.SendNotificationRequest]) (*connect.Response[v1.SendNotificationResponse], error)
 	GetNotification(context.Context, *connect.Request[v1.GetNotificationRequest]) (*connect.Response[v1.GetNotificationResponse], error)
+	ListNotifications(context.Context, *connect.Request[v1.ListNotificationsRequest]) (*connect.Response[v1.ListNotificationsResponse], error)
 }
 
 // NewNotificationServiceClient constructs a client for the notification.v1.NotificationService
@@ -70,13 +74,20 @@ func NewNotificationServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(notificationServiceMethods.ByName("GetNotification")),
 			connect.WithClientOptions(opts...),
 		),
+		listNotifications: connect.NewClient[v1.ListNotificationsRequest, v1.ListNotificationsResponse](
+			httpClient,
+			baseURL+NotificationServiceListNotificationsProcedure,
+			connect.WithSchema(notificationServiceMethods.ByName("ListNotifications")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // notificationServiceClient implements NotificationServiceClient.
 type notificationServiceClient struct {
-	sendNotification *connect.Client[v1.SendNotificationRequest, v1.SendNotificationResponse]
-	getNotification  *connect.Client[v1.GetNotificationRequest, v1.GetNotificationResponse]
+	sendNotification  *connect.Client[v1.SendNotificationRequest, v1.SendNotificationResponse]
+	getNotification   *connect.Client[v1.GetNotificationRequest, v1.GetNotificationResponse]
+	listNotifications *connect.Client[v1.ListNotificationsRequest, v1.ListNotificationsResponse]
 }
 
 // SendNotification calls notification.v1.NotificationService.SendNotification.
@@ -89,11 +100,17 @@ func (c *notificationServiceClient) GetNotification(ctx context.Context, req *co
 	return c.getNotification.CallUnary(ctx, req)
 }
 
+// ListNotifications calls notification.v1.NotificationService.ListNotifications.
+func (c *notificationServiceClient) ListNotifications(ctx context.Context, req *connect.Request[v1.ListNotificationsRequest]) (*connect.Response[v1.ListNotificationsResponse], error) {
+	return c.listNotifications.CallUnary(ctx, req)
+}
+
 // NotificationServiceHandler is an implementation of the notification.v1.NotificationService
 // service.
 type NotificationServiceHandler interface {
 	SendNotification(context.Context, *connect.Request[v1.SendNotificationRequest]) (*connect.Response[v1.SendNotificationResponse], error)
 	GetNotification(context.Context, *connect.Request[v1.GetNotificationRequest]) (*connect.Response[v1.GetNotificationResponse], error)
+	ListNotifications(context.Context, *connect.Request[v1.ListNotificationsRequest]) (*connect.Response[v1.ListNotificationsResponse], error)
 }
 
 // NewNotificationServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -115,12 +132,20 @@ func NewNotificationServiceHandler(svc NotificationServiceHandler, opts ...conne
 		connect.WithSchema(notificationServiceMethods.ByName("GetNotification")),
 		connect.WithHandlerOptions(opts...),
 	)
+	notificationServiceListNotificationsHandler := connect.NewUnaryHandler(
+		NotificationServiceListNotificationsProcedure,
+		svc.ListNotifications,
+		connect.WithSchema(notificationServiceMethods.ByName("ListNotifications")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/notification.v1.NotificationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case NotificationServiceSendNotificationProcedure:
 			notificationServiceSendNotificationHandler.ServeHTTP(w, r)
 		case NotificationServiceGetNotificationProcedure:
 			notificationServiceGetNotificationHandler.ServeHTTP(w, r)
+		case NotificationServiceListNotificationsProcedure:
+			notificationServiceListNotificationsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -136,4 +161,8 @@ func (UnimplementedNotificationServiceHandler) SendNotification(context.Context,
 
 func (UnimplementedNotificationServiceHandler) GetNotification(context.Context, *connect.Request[v1.GetNotificationRequest]) (*connect.Response[v1.GetNotificationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("notification.v1.NotificationService.GetNotification is not implemented"))
+}
+
+func (UnimplementedNotificationServiceHandler) ListNotifications(context.Context, *connect.Request[v1.ListNotificationsRequest]) (*connect.Response[v1.ListNotificationsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("notification.v1.NotificationService.ListNotifications is not implemented"))
 }

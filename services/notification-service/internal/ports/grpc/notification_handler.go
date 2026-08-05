@@ -18,15 +18,18 @@ type NotificationHandler struct {
 	notificationv1connect.UnimplementedNotificationServiceHandler
 	sendCmd *app.SendNotificationCommandHandler
 	getQry  *app.GetNotificationQueryHandler
+	listQry  *app.ListNotificationsQueryHandler
 }
 
 func NewNotificationHandler(
 	sendCmd *app.SendNotificationCommandHandler,
 	getQry *app.GetNotificationQueryHandler,
+	listQry *app.ListNotificationsQueryHandler,
 ) *NotificationHandler {
 	return &NotificationHandler{
 		sendCmd: sendCmd,
 		getQry:  getQry,
+		listQry:  listQry,
 	}
 }
 
@@ -76,6 +79,35 @@ func (h *NotificationHandler) GetNotification(
 	}
 
 	return connect.NewResponse(&v1.GetNotificationResponse{Notification: toProtoNotification(notification)}), nil
+}
+
+func (h *NotificationHandler) ListNotifications(
+	ctx context.Context,
+	req *connect.Request[v1.ListNotificationsRequest],
+) (*connect.Response[v1.ListNotificationsResponse], error) {
+	userID, ok := auth.GetUserID(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("unauthenticated"))
+	}
+
+	pageSize := req.Msg.GetPageSize()
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	notifications, err := h.listQry.Handle(ctx, userID, pageSize, 0)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	protoNotifications := make([]*v1.Notification, 0, len(notifications))
+	for _, n := range notifications {
+		protoNotifications = append(protoNotifications, toProtoNotification(n))
+	}
+
+	return connect.NewResponse(&v1.ListNotificationsResponse{
+		Notifications: protoNotifications,
+	}), nil
 }
 
 func mapProtoChannel(c v1.Channel) domain.Channel {

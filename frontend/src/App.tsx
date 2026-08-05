@@ -1,64 +1,76 @@
-import { useMutation } from "@connectrpc/connect-query"
-import React, { useState } from "react"
-import { register } from "./gen/v1/user-UserService_connectquery"
+import { useEffect, useState } from "react"
+import { queryClient } from "./api/query.ts"
+import { getToken, logout, onAuthChanged } from "./api/client.ts"
+import { AuthView } from "./components/AuthView.tsx"
+import { ShopView } from "./components/ShopView.tsx"
+import { CartView } from "./components/CartView.tsx"
+import { CheckoutView } from "./components/CheckoutView.tsx"
+import { PaymentView } from "./components/PaymentView.tsx"
+import { OrdersView } from "./components/OrdersView.tsx"
+import { NotificationsView } from "./components/NotificationsView.tsx"
+import "./App.css"
+
+type View = "shop" | "cart" | "checkout" | "payment" | "orders" | "notifications"
 
 export function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [response, setResponse] = useState<string>("");
-  const useRegister = useMutation(register, {
-    onSuccess: (data) => {
-      setResponse(`User created with ID: ${data.id}`);
-    },
-    onError: (error) => {
-      setResponse(`Error: ${error.message}`);
-    },
-  })
+  const [loggedIn, setLoggedIn] = useState(() => getToken() !== null)
+  const [view, setView] = useState<View>("shop")
+  const [payOrder, setPayOrder] = useState<{ id: string; totalCents: bigint } | null>(null)
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-      await useRegister.mutateAsync({
-        email,
-        password,
-        name,
-      });
-  };
+  useEffect(() => {
+    return onAuthChanged(() => {
+      queryClient.clear()
+      setLoggedIn(false)
+      setView("shop")
+    })
+  }, [])
+
+  const handleAuthed = () => {
+    setLoggedIn(true)
+    setView("shop")
+  }
+
+  const handleLogout = () => {
+    logout()
+    queryClient.clear()
+    setLoggedIn(false)
+  }
+
+  if (!loggedIn) {
+    return <AuthView onAuthed={handleAuthed} />
+  }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>E-Commerce User Registration</h2>
-      <form onSubmit={handleRegister}>
-        <div>
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+    <div className="app">
+      <nav className="nav">
+        <span className="nav-brand">Store</span>
+        <div className="nav-links">
+          <button className="nav-link" onClick={() => setView("shop")}>Shop</button>
+          <button className="nav-link" onClick={() => setView("cart")}>Cart</button>
+          <button className="nav-link" onClick={() => setView("orders")}>Orders</button>
+          <button className="nav-link" onClick={() => setView("notifications")}>Notifications</button>
         </div>
-        <div>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+        <button className="nav-logout" onClick={handleLogout}>Log out</button>
+      </nav>
+      <main className="content">
+        {view === "shop" && <ShopView onCheckout={() => setView("cart")} />}
+        {view === "cart" && <CartView onCheckout={() => setView("checkout")} />}
+        {view === "checkout" && (
+          <CheckoutView
+            onPaid={(id, totalCents) => {
+              setPayOrder({ id, totalCents })
+              setView("payment")
+            }}
           />
-        </div>
-        <div>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-
-      {response && <pre>{response}</pre>}
+        )}
+        {view === "payment" && payOrder && (
+          <PaymentView orderId={payOrder.id} totalCents={payOrder.totalCents} onDone={() => setView("orders")} />
+        )}
+        {view === "orders" && <OrdersView />}
+        {view === "notifications" && <NotificationsView />}
+      </main>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

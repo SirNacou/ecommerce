@@ -7,6 +7,13 @@ SELECT id, user_id, channel, recipient, subject, body, status, created_at, updat
 FROM notifications
 WHERE id = $1;
 
+-- name: ListNotificationsByUserID :many
+SELECT id, user_id, channel, recipient, subject, body, status, created_at, updated_at
+FROM notifications
+WHERE user_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
 -- name: UpdateNotificationStatus :exec
 UPDATE notifications
 SET status = $2,

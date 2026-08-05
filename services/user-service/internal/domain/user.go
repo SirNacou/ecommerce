@@ -32,25 +32,21 @@ type User struct {
 	CreatedAt    time.Time
 }
 
-// NewUser enforces business validation rules during user creation
-func NewUser(email, rawPassword, name string) (*User, error) {
+// NewUser enforces business validation rules during user creation.
+// passwordHash is expected to already be a bcrypt hash of the raw password.
+func NewUser(email, passwordHash, name string) (*User, error) {
 	if email == "" {
 		return nil, ErrInvalidEmail
 	}
-	if len(rawPassword) < 6 {
+	if passwordHash == "" {
 		return nil, ErrPasswordTooShort
-	}
-
-	hash, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
 	}
 
 	now := time.Now().UTC()
 	user := &User{
 		ID:           uuid.Must(uuid.NewV7()),
 		Email:        email,
-		PasswordHash: string(hash),
+		PasswordHash: passwordHash,
 		Name:         name,
 		CreatedAt:    now,
 	}
