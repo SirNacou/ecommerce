@@ -11,7 +11,12 @@ service CatalogService {
   rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
   rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc GetProductsByIds(GetProductsByIdsRequest) returns (GetProductsByIdsResponse);
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc GetStock(GetStockRequest) returns (GetStockResponse);
+  rpc SetStock(SetStockRequest) returns (SetStockResponse);
+  rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+  rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse);
 }
 
 message Category {
@@ -26,8 +31,13 @@ message Product {
   string name = 3;
   string description = 4;
   int64 price_cents = 5;
-  int32 stock_quantity = 6;
-  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message InventoryItem {
+  string product_id = 1;
+  int32 available_quantity = 2;
+  int32 reserved_quantity = 3;
 }
 
 message CreateCategoryRequest {
@@ -50,7 +60,6 @@ message CreateProductRequest {
   string name = 2;
   string description = 3;
   int64 price_cents = 4;
-  int32 stock_quantity = 5;
 }
 
 message CreateProductResponse {
@@ -65,6 +74,14 @@ message GetProductResponse {
   Product product = 1;
 }
 
+message GetProductsByIdsRequest {
+  repeated string ids = 1;
+}
+
+message GetProductsByIdsResponse {
+  repeated Product products = 1;
+}
+
 message ListProductsRequest {
   int32 page_size = 1;
   string page_token = 2;
@@ -74,4 +91,42 @@ message ListProductsRequest {
 message ListProductsResponse {
   repeated Product products = 1;
   string next_page_token = 2;
+}
+
+message GetStockRequest {
+  string product_id = 1;
+}
+
+message GetStockResponse {
+  InventoryItem item = 1;
+}
+
+message SetStockRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message SetStockResponse {
+  InventoryItem item = 1;
+}
+
+message ReserveStockRequest {
+  string reservation_id = 1; // Idempotency key (e.g. Order ID)
+  string product_id = 2;
+  int32 quantity = 3;
+}
+
+message ReserveStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseStockRequest {
+  string reservation_id = 1;
+  string product_id = 2;
+  int32 quantity = 3;
+}
+
+message ReleaseStockResponse {
+  bool success = 1;
 }

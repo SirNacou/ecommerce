@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -62,14 +63,13 @@ type catalogStore struct {
 
 func (s *catalogStore) CreateProduct(ctx context.Context, p *domain.Product) error {
 	err := s.queries.CreateProduct(ctx, db.CreateProductParams{
-		ID:            p.ID,
-		CategoryID:    p.CategoryID,
-		Name:          p.Name,
-		Description:   p.Description,
-		PriceCents:    p.PriceCents,
-		StockQuantity: p.StockQuantity,
-		CreatedAt:     p.CreatedAt,
-		UpdatedAt:     p.UpdatedAt,
+		ID:          p.ID,
+		CategoryID:  p.CategoryID,
+		Name:        p.Name,
+		Description: p.Description,
+		PriceCents:  p.PriceCents,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("sqlc create product failed: %w", err)
@@ -89,14 +89,13 @@ func (s *catalogStore) GetProductByID(ctx context.Context, id uuid.UUID) (*domai
 
 	// Map sqlc struct -> domain Entity
 	return &domain.Product{
-		ID:            row.ID,
-		CategoryID:    row.CategoryID,
-		Name:          row.Name,
-		Description:   row.Description,
-		PriceCents:    row.PriceCents,
-		StockQuantity: row.StockQuantity,
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
+		ID:          row.ID,
+		CategoryID:  row.CategoryID,
+		Name:        row.Name,
+		Description: row.Description,
+		PriceCents:  row.PriceCents,
+		CreatedAt:   row.CreatedAt,
+		UpdatedAt:   row.UpdatedAt,
 	}, nil
 }
 
@@ -113,14 +112,35 @@ func (s *catalogStore) ListProducts(ctx context.Context, categoryID *uuid.UUID, 
 	products := make([]*domain.Product, 0, len(rows))
 	for _, row := range rows {
 		products = append(products, &domain.Product{
-			ID:            row.ID,
-			CategoryID:    row.CategoryID,
-			Name:          row.Name,
-			Description:   row.Description,
-			PriceCents:    row.PriceCents,
-			StockQuantity: row.StockQuantity,
-			CreatedAt:     row.CreatedAt,
-			UpdatedAt:     row.UpdatedAt,
+			ID:          row.ID,
+			CategoryID:  row.CategoryID,
+			Name:        row.Name,
+			Description: row.Description,
+			PriceCents:  row.PriceCents,
+			CreatedAt:   row.CreatedAt,
+			UpdatedAt:   row.UpdatedAt,
+		})
+	}
+
+	return products, nil
+}
+
+func (s *catalogStore) ListProductsByIds(ctx context.Context, ids []uuid.UUID) ([]*domain.Product, error) {
+	rows, err := s.queries.ListProductsByIds(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("sqlc list products by ids failed: %w", err)
+	}
+
+	products := make([]*domain.Product, 0, len(rows))
+	for _, row := range rows {
+		products = append(products, &domain.Product{
+			ID:          row.ID,
+			CategoryID:  row.CategoryID,
+			Name:        row.Name,
+			Description: row.Description,
+			PriceCents:  row.PriceCents,
+			CreatedAt:   row.CreatedAt,
+			UpdatedAt:   row.UpdatedAt,
 		})
 	}
 
@@ -179,4 +199,114 @@ func (s *catalogStore) ListCategories(ctx context.Context) ([]*domain.Category, 
 	}
 
 	return categories, nil
+}
+
+// -----------------------------------------------------------------------------
+// Inventory
+// -----------------------------------------------------------------------------
+
+func (s *catalogStore) GetItemForUpdate(ctx context.Context, productID uuid.UUID) (*domain.InventoryItem, error) {
+	row, err := s.queries.GetInventoryItemForUpdate(ctx, productID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, domain.ErrItemNotFound
+		}
+		return nil, fmt.Errorf("sqlc get inventory item failed: %w", err)
+	}
+
+	return &domain.InventoryItem{
+		ProductID:         row.ProductID,
+		AvailableQuantity: row.AvailableQuantity,
+		ReservedQuantity:  row.ReservedQuantity,
+		CreatedAt:         row.CreatedAt,
+		UpdatedAt:         row.UpdatedAt,
+	}, nil
+}
+
+func (s *catalogStore) GetItem(ctx context.Context, productID uuid.UUID) (*domain.InventoryItem, error) {
+	row, err := s.queries.GetInventoryItem(ctx, productID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, domain.ErrItemNotFound
+		}
+		return nil, fmt.Errorf("sqlc get inventory item failed: %w", err)
+	}
+
+	return &domain.InventoryItem{
+		ProductID:         row.ProductID,
+		AvailableQuantity: row.AvailableQuantity,
+		ReservedQuantity:  row.ReservedQuantity,
+		CreatedAt:         row.CreatedAt,
+		UpdatedAt:         row.UpdatedAt,
+	}, nil
+}
+
+func (s *catalogStore) UpsertItem(ctx context.Context, item *domain.InventoryItem) error {
+	return s.queries.UpsertInventoryItem(ctx, db.UpsertInventoryItemParams{
+		ProductID:         item.ProductID,
+		AvailableQuantity: item.AvailableQuantity,
+		ReservedQuantity:  item.ReservedQuantity,
+		CreatedAt:         item.CreatedAt,
+		UpdatedAt:         item.UpdatedAt,
+	})
+}
+
+func (s *catalogStore) UpdateStock(ctx context.Context, item *domain.InventoryItem) error {
+	return s.queries.UpdateStockQuantities(ctx, db.UpdateStockQuantitiesParams{
+		ProductID:         item.ProductID,
+		AvailableQuantity: item.AvailableQuantity,
+		ReservedQuantity:  item.ReservedQuantity,
+		UpdatedAt:         item.UpdatedAt,
+	})
+}
+
+func (s *catalogStore) CreateReservation(ctx context.Context, reservationID, productID uuid.UUID, quantity int32) error {
+	now := time.Now().UTC()
+	return s.queries.CreateStockReservation(ctx, db.CreateStockReservationParams{
+		ID:        reservationID,
+		ProductID: productID,
+		Quantity:  quantity,
+		Status:    "RESERVED",
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+}
+
+func (s *catalogStore) GetReservation(ctx context.Context, reservationID uuid.UUID) (*domain.StockReservation, error) {
+	row, err := s.queries.GetStockReservation(ctx, reservationID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, domain.ErrItemNotFound
+		}
+		return nil, fmt.Errorf("sqlc get reservation failed: %w", err)
+	}
+
+	return &domain.StockReservation{
+		ID:        row.ID,
+		ProductID: row.ProductID,
+		Quantity:  row.Quantity,
+		Status:    row.Status,
+		CreatedAt: row.CreatedAt,
+		UpdatedAt: row.UpdatedAt,
+	}, nil
+}
+
+func (s *catalogStore) UpdateReservationStatus(ctx context.Context, reservationID uuid.UUID, status string) error {
+	return s.queries.UpdateStockReservationStatus(ctx, db.UpdateStockReservationStatusParams{
+		ID:        reservationID,
+		Status:    status,
+		UpdatedAt: time.Now().UTC(),
+	})
+}
+
+func (s *catalogStore) SaveOutboxEvent(ctx context.Context, aggregateType, aggregateID, eventType string, payload []byte) error {
+	return s.queries.InsertOutboxEvent(ctx, db.InsertOutboxEventParams{
+		ID:            uuid.New(),
+		AggregateType: aggregateType,
+		AggregateID:   aggregateID,
+		EventType:     eventType,
+		Payload:       payload,
+		Status:        "PENDING",
+		CreatedAt:     time.Now().UTC(),
+	})
 }

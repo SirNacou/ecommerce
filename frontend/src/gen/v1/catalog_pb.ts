@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/catalog.proto.
  */
 export const file_v1_catalog: GenFile = /*@__PURE__*/
-  fileDesc("ChB2MS9jYXRhbG9nLnByb3RvEgpjYXRhbG9nLnYxIjIKCENhdGVnb3J5EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDAoEc2x1ZxgDIAEoCSKqAQoHUHJvZHVjdBIKCgJpZBgBIAEoCRITCgtjYXRlZ29yeV9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEhMKC3ByaWNlX2NlbnRzGAUgASgDEhYKDnN0b2NrX3F1YW50aXR5GAYgASgFEi4KCmNyZWF0ZWRfYXQYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjMKFUNyZWF0ZUNhdGVnb3J5UmVxdWVzdBIMCgRuYW1lGAEgASgJEgwKBHNsdWcYAiABKAkiQAoWQ3JlYXRlQ2F0ZWdvcnlSZXNwb25zZRImCghjYXRlZ29yeRgBIAEoCzIULmNhdGFsb2cudjEuQ2F0ZWdvcnkiFwoVTGlzdENhdGVnb3JpZXNSZXF1ZXN0IkIKFkxpc3RDYXRlZ29yaWVzUmVzcG9uc2USKAoKY2F0ZWdvcmllcxgBIAMoCzIULmNhdGFsb2cudjEuQ2F0ZWdvcnkiewoUQ3JlYXRlUHJvZHVjdFJlcXVlc3QSEwoLY2F0ZWdvcnlfaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRITCgtwcmljZV9jZW50cxgEIAEoAxIWCg5zdG9ja19xdWFudGl0eRgFIAEoBSI9ChVDcmVhdGVQcm9kdWN0UmVzcG9uc2USJAoHcHJvZHVjdBgBIAEoCzITLmNhdGFsb2cudjEuUHJvZHVjdCIfChFHZXRQcm9kdWN0UmVxdWVzdBIKCgJpZBgBIAEoCSI6ChJHZXRQcm9kdWN0UmVzcG9uc2USJAoHcHJvZHVjdBgBIAEoCzITLmNhdGFsb2cudjEuUHJvZHVjdCJRChNMaXN0UHJvZHVjdHNSZXF1ZXN0EhEKCXBhZ2Vfc2l6ZRgBIAEoBRISCgpwYWdlX3Rva2VuGAIgASgJEhMKC2NhdGVnb3J5X2lkGAMgASgJIlYKFExpc3RQcm9kdWN0c1Jlc3BvbnNlEiUKCHByb2R1Y3RzGAEgAygLMhMuY2F0YWxvZy52MS5Qcm9kdWN0EhcKD25leHRfcGFnZV90b2tlbhgCIAEoCTK4AwoOQ2F0YWxvZ1NlcnZpY2USVwoOQ3JlYXRlQ2F0ZWdvcnkSIS5jYXRhbG9nLnYxLkNyZWF0ZUNhdGVnb3J5UmVxdWVzdBoiLmNhdGFsb2cudjEuQ3JlYXRlQ2F0ZWdvcnlSZXNwb25zZRJXCg5MaXN0Q2F0ZWdvcmllcxIhLmNhdGFsb2cudjEuTGlzdENhdGVnb3JpZXNSZXF1ZXN0GiIuY2F0YWxvZy52MS5MaXN0Q2F0ZWdvcmllc1Jlc3BvbnNlElQKDUNyZWF0ZVByb2R1Y3QSIC5jYXRhbG9nLnYxLkNyZWF0ZVByb2R1Y3RSZXF1ZXN0GiEuY2F0YWxvZy52MS5DcmVhdGVQcm9kdWN0UmVzcG9uc2USSwoKR2V0UHJvZHVjdBIdLmNhdGFsb2cudjEuR2V0UHJvZHVjdFJlcXVlc3QaHi5jYXRhbG9nLnYxLkdldFByb2R1Y3RSZXNwb25zZRJRCgxMaXN0UHJvZHVjdHMSHy5jYXRhbG9nLnYxLkxpc3RQcm9kdWN0c1JlcXVlc3QaIC5jYXRhbG9nLnYxLkxpc3RQcm9kdWN0c1Jlc3BvbnNlQklaR2dpdGh1Yi5jb20vU2lyTmFjb3UvZWNvbW1lcmNlL3NlcnZpY2VzL2NhdGFsb2ctc2VydmljZS9nZW4vdjE7Y2F0YWxvZ3YxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChB2MS9jYXRhbG9nLnByb3RvEgpjYXRhbG9nLnYxIjIKCENhdGVnb3J5EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDAoEc2x1ZxgDIAEoCSKSAQoHUHJvZHVjdBIKCgJpZBgBIAEoCRITCgtjYXRlZ29yeV9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEhMKC3ByaWNlX2NlbnRzGAUgASgDEi4KCmNyZWF0ZWRfYXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIloKDUludmVudG9yeUl0ZW0SEgoKcHJvZHVjdF9pZBgBIAEoCRIaChJhdmFpbGFibGVfcXVhbnRpdHkYAiABKAUSGQoRcmVzZXJ2ZWRfcXVhbnRpdHkYAyABKAUiMwoVQ3JlYXRlQ2F0ZWdvcnlSZXF1ZXN0EgwKBG5hbWUYASABKAkSDAoEc2x1ZxgCIAEoCSJAChZDcmVhdGVDYXRlZ29yeVJlc3BvbnNlEiYKCGNhdGVnb3J5GAEgASgLMhQuY2F0YWxvZy52MS5DYXRlZ29yeSIXChVMaXN0Q2F0ZWdvcmllc1JlcXVlc3QiQgoWTGlzdENhdGVnb3JpZXNSZXNwb25zZRIoCgpjYXRlZ29yaWVzGAEgAygLMhQuY2F0YWxvZy52MS5DYXRlZ29yeSJjChRDcmVhdGVQcm9kdWN0UmVxdWVzdBITCgtjYXRlZ29yeV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhMKC3ByaWNlX2NlbnRzGAQgASgDIj0KFUNyZWF0ZVByb2R1Y3RSZXNwb25zZRIkCgdwcm9kdWN0GAEgASgLMhMuY2F0YWxvZy52MS5Qcm9kdWN0Ih8KEUdldFByb2R1Y3RSZXF1ZXN0EgoKAmlkGAEgASgJIjoKEkdldFByb2R1Y3RSZXNwb25zZRIkCgdwcm9kdWN0GAEgASgLMhMuY2F0YWxvZy52MS5Qcm9kdWN0IiYKF0dldFByb2R1Y3RzQnlJZHNSZXF1ZXN0EgsKA2lkcxgBIAMoCSJBChhHZXRQcm9kdWN0c0J5SWRzUmVzcG9uc2USJQoIcHJvZHVjdHMYASADKAsyEy5jYXRhbG9nLnYxLlByb2R1Y3QiUQoTTGlzdFByb2R1Y3RzUmVxdWVzdBIRCglwYWdlX3NpemUYASABKAUSEgoKcGFnZV90b2tlbhgCIAEoCRITCgtjYXRlZ29yeV9pZBgDIAEoCSJWChRMaXN0UHJvZHVjdHNSZXNwb25zZRIlCghwcm9kdWN0cxgBIAMoCzITLmNhdGFsb2cudjEuUHJvZHVjdBIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkiJQoPR2V0U3RvY2tSZXF1ZXN0EhIKCnByb2R1Y3RfaWQYASABKAkiOwoQR2V0U3RvY2tSZXNwb25zZRInCgRpdGVtGAEgASgLMhkuY2F0YWxvZy52MS5JbnZlbnRvcnlJdGVtIjcKD1NldFN0b2NrUmVxdWVzdBISCgpwcm9kdWN0X2lkGAEgASgJEhAKCHF1YW50aXR5GAIgASgFIjsKEFNldFN0b2NrUmVzcG9uc2USJwoEaXRlbRgBIAEoCzIZLmNhdGFsb2cudjEuSW52ZW50b3J5SXRlbSJTChNSZXNlcnZlU3RvY2tSZXF1ZXN0EhYKDnJlc2VydmF0aW9uX2lkGAEgASgJEhIKCnByb2R1Y3RfaWQYAiABKAkSEAoIcXVhbnRpdHkYAyABKAUiOAoUUmVzZXJ2ZVN0b2NrUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIPCgdtZXNzYWdlGAIgASgJIlMKE1JlbGVhc2VTdG9ja1JlcXVlc3QSFgoOcmVzZXJ2YXRpb25faWQYASABKAkSEgoKcHJvZHVjdF9pZBgCIAEoCRIQCghxdWFudGl0eRgDIAEoBSInChRSZWxlYXNlU3RvY2tSZXNwb25zZRIPCgdzdWNjZXNzGAEgASgIMssGCg5DYXRhbG9nU2VydmljZRJXCg5DcmVhdGVDYXRlZ29yeRIhLmNhdGFsb2cudjEuQ3JlYXRlQ2F0ZWdvcnlSZXF1ZXN0GiIuY2F0YWxvZy52MS5DcmVhdGVDYXRlZ29yeVJlc3BvbnNlElcKDkxpc3RDYXRlZ29yaWVzEiEuY2F0YWxvZy52MS5MaXN0Q2F0ZWdvcmllc1JlcXVlc3QaIi5jYXRhbG9nLnYxLkxpc3RDYXRlZ29yaWVzUmVzcG9uc2USVAoNQ3JlYXRlUHJvZHVjdBIgLmNhdGFsb2cudjEuQ3JlYXRlUHJvZHVjdFJlcXVlc3QaIS5jYXRhbG9nLnYxLkNyZWF0ZVByb2R1Y3RSZXNwb25zZRJLCgpHZXRQcm9kdWN0Eh0uY2F0YWxvZy52MS5HZXRQcm9kdWN0UmVxdWVzdBoeLmNhdGFsb2cudjEuR2V0UHJvZHVjdFJlc3BvbnNlEl0KEEdldFByb2R1Y3RzQnlJZHMSIy5jYXRhbG9nLnYxLkdldFByb2R1Y3RzQnlJZHNSZXF1ZXN0GiQuY2F0YWxvZy52MS5HZXRQcm9kdWN0c0J5SWRzUmVzcG9uc2USUQoMTGlzdFByb2R1Y3RzEh8uY2F0YWxvZy52MS5MaXN0UHJvZHVjdHNSZXF1ZXN0GiAuY2F0YWxvZy52MS5MaXN0UHJvZHVjdHNSZXNwb25zZRJFCghHZXRTdG9jaxIbLmNhdGFsb2cudjEuR2V0U3RvY2tSZXF1ZXN0GhwuY2F0YWxvZy52MS5HZXRTdG9ja1Jlc3BvbnNlEkUKCFNldFN0b2NrEhsuY2F0YWxvZy52MS5TZXRTdG9ja1JlcXVlc3QaHC5jYXRhbG9nLnYxLlNldFN0b2NrUmVzcG9uc2USUQoMUmVzZXJ2ZVN0b2NrEh8uY2F0YWxvZy52MS5SZXNlcnZlU3RvY2tSZXF1ZXN0GiAuY2F0YWxvZy52MS5SZXNlcnZlU3RvY2tSZXNwb25zZRJRCgxSZWxlYXNlU3RvY2sSHy5jYXRhbG9nLnYxLlJlbGVhc2VTdG9ja1JlcXVlc3QaIC5jYXRhbG9nLnYxLlJlbGVhc2VTdG9ja1Jlc3BvbnNlQklaR2dpdGh1Yi5jb20vU2lyTmFjb3UvZWNvbW1lcmNlL3NlcnZpY2VzL2NhdGFsb2ctc2VydmljZS9nZW4vdjE7Y2F0YWxvZ3YxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message catalog.v1.Category
@@ -71,12 +71,7 @@ export type Product = Message<"catalog.v1.Product"> & {
   priceCents: bigint;
 
   /**
-   * @generated from field: int32 stock_quantity = 6;
-   */
-  stockQuantity: number;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp created_at = 7;
+   * @generated from field: google.protobuf.Timestamp created_at = 6;
    */
   createdAt?: Timestamp;
 };
@@ -87,6 +82,33 @@ export type Product = Message<"catalog.v1.Product"> & {
  */
 export const ProductSchema: GenMessage<Product> = /*@__PURE__*/
   messageDesc(file_v1_catalog, 1);
+
+/**
+ * @generated from message catalog.v1.InventoryItem
+ */
+export type InventoryItem = Message<"catalog.v1.InventoryItem"> & {
+  /**
+   * @generated from field: string product_id = 1;
+   */
+  productId: string;
+
+  /**
+   * @generated from field: int32 available_quantity = 2;
+   */
+  availableQuantity: number;
+
+  /**
+   * @generated from field: int32 reserved_quantity = 3;
+   */
+  reservedQuantity: number;
+};
+
+/**
+ * Describes the message catalog.v1.InventoryItem.
+ * Use `create(InventoryItemSchema)` to create a new message.
+ */
+export const InventoryItemSchema: GenMessage<InventoryItem> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 2);
 
 /**
  * @generated from message catalog.v1.CreateCategoryRequest
@@ -108,7 +130,7 @@ export type CreateCategoryRequest = Message<"catalog.v1.CreateCategoryRequest"> 
  * Use `create(CreateCategoryRequestSchema)` to create a new message.
  */
 export const CreateCategoryRequestSchema: GenMessage<CreateCategoryRequest> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 2);
+  messageDesc(file_v1_catalog, 3);
 
 /**
  * @generated from message catalog.v1.CreateCategoryResponse
@@ -125,7 +147,7 @@ export type CreateCategoryResponse = Message<"catalog.v1.CreateCategoryResponse"
  * Use `create(CreateCategoryResponseSchema)` to create a new message.
  */
 export const CreateCategoryResponseSchema: GenMessage<CreateCategoryResponse> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 3);
+  messageDesc(file_v1_catalog, 4);
 
 /**
  * @generated from message catalog.v1.ListCategoriesRequest
@@ -138,7 +160,7 @@ export type ListCategoriesRequest = Message<"catalog.v1.ListCategoriesRequest"> 
  * Use `create(ListCategoriesRequestSchema)` to create a new message.
  */
 export const ListCategoriesRequestSchema: GenMessage<ListCategoriesRequest> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 4);
+  messageDesc(file_v1_catalog, 5);
 
 /**
  * @generated from message catalog.v1.ListCategoriesResponse
@@ -155,7 +177,7 @@ export type ListCategoriesResponse = Message<"catalog.v1.ListCategoriesResponse"
  * Use `create(ListCategoriesResponseSchema)` to create a new message.
  */
 export const ListCategoriesResponseSchema: GenMessage<ListCategoriesResponse> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 5);
+  messageDesc(file_v1_catalog, 6);
 
 /**
  * @generated from message catalog.v1.CreateProductRequest
@@ -180,11 +202,6 @@ export type CreateProductRequest = Message<"catalog.v1.CreateProductRequest"> & 
    * @generated from field: int64 price_cents = 4;
    */
   priceCents: bigint;
-
-  /**
-   * @generated from field: int32 stock_quantity = 5;
-   */
-  stockQuantity: number;
 };
 
 /**
@@ -192,7 +209,7 @@ export type CreateProductRequest = Message<"catalog.v1.CreateProductRequest"> & 
  * Use `create(CreateProductRequestSchema)` to create a new message.
  */
 export const CreateProductRequestSchema: GenMessage<CreateProductRequest> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 6);
+  messageDesc(file_v1_catalog, 7);
 
 /**
  * @generated from message catalog.v1.CreateProductResponse
@@ -209,7 +226,7 @@ export type CreateProductResponse = Message<"catalog.v1.CreateProductResponse"> 
  * Use `create(CreateProductResponseSchema)` to create a new message.
  */
 export const CreateProductResponseSchema: GenMessage<CreateProductResponse> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 7);
+  messageDesc(file_v1_catalog, 8);
 
 /**
  * @generated from message catalog.v1.GetProductRequest
@@ -226,7 +243,7 @@ export type GetProductRequest = Message<"catalog.v1.GetProductRequest"> & {
  * Use `create(GetProductRequestSchema)` to create a new message.
  */
 export const GetProductRequestSchema: GenMessage<GetProductRequest> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 8);
+  messageDesc(file_v1_catalog, 9);
 
 /**
  * @generated from message catalog.v1.GetProductResponse
@@ -243,7 +260,41 @@ export type GetProductResponse = Message<"catalog.v1.GetProductResponse"> & {
  * Use `create(GetProductResponseSchema)` to create a new message.
  */
 export const GetProductResponseSchema: GenMessage<GetProductResponse> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 9);
+  messageDesc(file_v1_catalog, 10);
+
+/**
+ * @generated from message catalog.v1.GetProductsByIdsRequest
+ */
+export type GetProductsByIdsRequest = Message<"catalog.v1.GetProductsByIdsRequest"> & {
+  /**
+   * @generated from field: repeated string ids = 1;
+   */
+  ids: string[];
+};
+
+/**
+ * Describes the message catalog.v1.GetProductsByIdsRequest.
+ * Use `create(GetProductsByIdsRequestSchema)` to create a new message.
+ */
+export const GetProductsByIdsRequestSchema: GenMessage<GetProductsByIdsRequest> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 11);
+
+/**
+ * @generated from message catalog.v1.GetProductsByIdsResponse
+ */
+export type GetProductsByIdsResponse = Message<"catalog.v1.GetProductsByIdsResponse"> & {
+  /**
+   * @generated from field: repeated catalog.v1.Product products = 1;
+   */
+  products: Product[];
+};
+
+/**
+ * Describes the message catalog.v1.GetProductsByIdsResponse.
+ * Use `create(GetProductsByIdsResponseSchema)` to create a new message.
+ */
+export const GetProductsByIdsResponseSchema: GenMessage<GetProductsByIdsResponse> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 12);
 
 /**
  * @generated from message catalog.v1.ListProductsRequest
@@ -270,7 +321,7 @@ export type ListProductsRequest = Message<"catalog.v1.ListProductsRequest"> & {
  * Use `create(ListProductsRequestSchema)` to create a new message.
  */
 export const ListProductsRequestSchema: GenMessage<ListProductsRequest> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 10);
+  messageDesc(file_v1_catalog, 13);
 
 /**
  * @generated from message catalog.v1.ListProductsResponse
@@ -292,7 +343,175 @@ export type ListProductsResponse = Message<"catalog.v1.ListProductsResponse"> & 
  * Use `create(ListProductsResponseSchema)` to create a new message.
  */
 export const ListProductsResponseSchema: GenMessage<ListProductsResponse> = /*@__PURE__*/
-  messageDesc(file_v1_catalog, 11);
+  messageDesc(file_v1_catalog, 14);
+
+/**
+ * @generated from message catalog.v1.GetStockRequest
+ */
+export type GetStockRequest = Message<"catalog.v1.GetStockRequest"> & {
+  /**
+   * @generated from field: string product_id = 1;
+   */
+  productId: string;
+};
+
+/**
+ * Describes the message catalog.v1.GetStockRequest.
+ * Use `create(GetStockRequestSchema)` to create a new message.
+ */
+export const GetStockRequestSchema: GenMessage<GetStockRequest> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 15);
+
+/**
+ * @generated from message catalog.v1.GetStockResponse
+ */
+export type GetStockResponse = Message<"catalog.v1.GetStockResponse"> & {
+  /**
+   * @generated from field: catalog.v1.InventoryItem item = 1;
+   */
+  item?: InventoryItem;
+};
+
+/**
+ * Describes the message catalog.v1.GetStockResponse.
+ * Use `create(GetStockResponseSchema)` to create a new message.
+ */
+export const GetStockResponseSchema: GenMessage<GetStockResponse> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 16);
+
+/**
+ * @generated from message catalog.v1.SetStockRequest
+ */
+export type SetStockRequest = Message<"catalog.v1.SetStockRequest"> & {
+  /**
+   * @generated from field: string product_id = 1;
+   */
+  productId: string;
+
+  /**
+   * @generated from field: int32 quantity = 2;
+   */
+  quantity: number;
+};
+
+/**
+ * Describes the message catalog.v1.SetStockRequest.
+ * Use `create(SetStockRequestSchema)` to create a new message.
+ */
+export const SetStockRequestSchema: GenMessage<SetStockRequest> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 17);
+
+/**
+ * @generated from message catalog.v1.SetStockResponse
+ */
+export type SetStockResponse = Message<"catalog.v1.SetStockResponse"> & {
+  /**
+   * @generated from field: catalog.v1.InventoryItem item = 1;
+   */
+  item?: InventoryItem;
+};
+
+/**
+ * Describes the message catalog.v1.SetStockResponse.
+ * Use `create(SetStockResponseSchema)` to create a new message.
+ */
+export const SetStockResponseSchema: GenMessage<SetStockResponse> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 18);
+
+/**
+ * @generated from message catalog.v1.ReserveStockRequest
+ */
+export type ReserveStockRequest = Message<"catalog.v1.ReserveStockRequest"> & {
+  /**
+   * Idempotency key (e.g. Order ID)
+   *
+   * @generated from field: string reservation_id = 1;
+   */
+  reservationId: string;
+
+  /**
+   * @generated from field: string product_id = 2;
+   */
+  productId: string;
+
+  /**
+   * @generated from field: int32 quantity = 3;
+   */
+  quantity: number;
+};
+
+/**
+ * Describes the message catalog.v1.ReserveStockRequest.
+ * Use `create(ReserveStockRequestSchema)` to create a new message.
+ */
+export const ReserveStockRequestSchema: GenMessage<ReserveStockRequest> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 19);
+
+/**
+ * @generated from message catalog.v1.ReserveStockResponse
+ */
+export type ReserveStockResponse = Message<"catalog.v1.ReserveStockResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+
+  /**
+   * @generated from field: string message = 2;
+   */
+  message: string;
+};
+
+/**
+ * Describes the message catalog.v1.ReserveStockResponse.
+ * Use `create(ReserveStockResponseSchema)` to create a new message.
+ */
+export const ReserveStockResponseSchema: GenMessage<ReserveStockResponse> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 20);
+
+/**
+ * @generated from message catalog.v1.ReleaseStockRequest
+ */
+export type ReleaseStockRequest = Message<"catalog.v1.ReleaseStockRequest"> & {
+  /**
+   * @generated from field: string reservation_id = 1;
+   */
+  reservationId: string;
+
+  /**
+   * @generated from field: string product_id = 2;
+   */
+  productId: string;
+
+  /**
+   * @generated from field: int32 quantity = 3;
+   */
+  quantity: number;
+};
+
+/**
+ * Describes the message catalog.v1.ReleaseStockRequest.
+ * Use `create(ReleaseStockRequestSchema)` to create a new message.
+ */
+export const ReleaseStockRequestSchema: GenMessage<ReleaseStockRequest> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 21);
+
+/**
+ * @generated from message catalog.v1.ReleaseStockResponse
+ */
+export type ReleaseStockResponse = Message<"catalog.v1.ReleaseStockResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+};
+
+/**
+ * Describes the message catalog.v1.ReleaseStockResponse.
+ * Use `create(ReleaseStockResponseSchema)` to create a new message.
+ */
+export const ReleaseStockResponseSchema: GenMessage<ReleaseStockResponse> = /*@__PURE__*/
+  messageDesc(file_v1_catalog, 22);
 
 /**
  * @generated from service catalog.v1.CatalogService
@@ -331,12 +550,52 @@ export const CatalogService: GenService<{
     output: typeof GetProductResponseSchema;
   },
   /**
+   * @generated from rpc catalog.v1.CatalogService.GetProductsByIds
+   */
+  getProductsByIds: {
+    methodKind: "unary";
+    input: typeof GetProductsByIdsRequestSchema;
+    output: typeof GetProductsByIdsResponseSchema;
+  },
+  /**
    * @generated from rpc catalog.v1.CatalogService.ListProducts
    */
   listProducts: {
     methodKind: "unary";
     input: typeof ListProductsRequestSchema;
     output: typeof ListProductsResponseSchema;
+  },
+  /**
+   * @generated from rpc catalog.v1.CatalogService.GetStock
+   */
+  getStock: {
+    methodKind: "unary";
+    input: typeof GetStockRequestSchema;
+    output: typeof GetStockResponseSchema;
+  },
+  /**
+   * @generated from rpc catalog.v1.CatalogService.SetStock
+   */
+  setStock: {
+    methodKind: "unary";
+    input: typeof SetStockRequestSchema;
+    output: typeof SetStockResponseSchema;
+  },
+  /**
+   * @generated from rpc catalog.v1.CatalogService.ReserveStock
+   */
+  reserveStock: {
+    methodKind: "unary";
+    input: typeof ReserveStockRequestSchema;
+    output: typeof ReserveStockResponseSchema;
+  },
+  /**
+   * @generated from rpc catalog.v1.CatalogService.ReleaseStock
+   */
+  releaseStock: {
+    methodKind: "unary";
+    input: typeof ReleaseStockRequestSchema;
+    output: typeof ReleaseStockResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_v1_catalog, 0);

@@ -35,19 +35,18 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 }
 
 const createProduct = `-- name: CreateProduct :exec
-INSERT INTO products (id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO products (id, category_id, name, description, price_cents, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 type CreateProductParams struct {
-	ID            uuid.UUID `json:"id"`
-	CategoryID    uuid.UUID `json:"category_id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	PriceCents    int64     `json:"price_cents"`
-	StockQuantity int32     `json:"stock_quantity"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	CategoryID  uuid.UUID `json:"category_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	PriceCents  int64     `json:"price_cents"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) error {
@@ -57,7 +56,32 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) er
 		arg.Name,
 		arg.Description,
 		arg.PriceCents,
-		arg.StockQuantity,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const createStockReservation = `-- name: CreateStockReservation :exec
+INSERT INTO stock_reservations (id, product_id, quantity, status, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
+`
+
+type CreateStockReservationParams struct {
+	ID        uuid.UUID `json:"id"`
+	ProductID uuid.UUID `json:"product_id"`
+	Quantity  int32     `json:"quantity"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (q *Queries) CreateStockReservation(ctx context.Context, arg CreateStockReservationParams) error {
+	_, err := q.db.Exec(ctx, createStockReservation,
+		arg.ID,
+		arg.ProductID,
+		arg.Quantity,
+		arg.Status,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -82,8 +106,84 @@ func (q *Queries) GetCategoryByID(ctx context.Context, id uuid.UUID) (Category, 
 	return i, err
 }
 
+const getInventoryItem = `-- name: GetInventoryItem :one
+SELECT product_id, available_quantity, reserved_quantity, created_at, updated_at
+FROM inventory_items
+WHERE product_id = $1
+`
+
+func (q *Queries) GetInventoryItem(ctx context.Context, productID uuid.UUID) (InventoryItem, error) {
+	row := q.db.QueryRow(ctx, getInventoryItem, productID)
+	var i InventoryItem
+	err := row.Scan(
+		&i.ProductID,
+		&i.AvailableQuantity,
+		&i.ReservedQuantity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getInventoryItemForUpdate = `-- name: GetInventoryItemForUpdate :one
+SELECT product_id, available_quantity, reserved_quantity, created_at, updated_at
+FROM inventory_items
+WHERE product_id = $1
+FOR UPDATE
+`
+
+func (q *Queries) GetInventoryItemForUpdate(ctx context.Context, productID uuid.UUID) (InventoryItem, error) {
+	row := q.db.QueryRow(ctx, getInventoryItemForUpdate, productID)
+	var i InventoryItem
+	err := row.Scan(
+		&i.ProductID,
+		&i.AvailableQuantity,
+		&i.ReservedQuantity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPendingOutboxEvents = `-- name: GetPendingOutboxEvents :many
+SELECT id, aggregate_type, aggregate_id, event_type, payload, status, created_at
+FROM outbox_events
+WHERE status = 'PENDING'
+ORDER BY created_at ASC
+LIMIT $1
+FOR UPDATE SKIP LOCKED
+`
+
+func (q *Queries) GetPendingOutboxEvents(ctx context.Context, limit int32) ([]OutboxEvent, error) {
+	rows, err := q.db.Query(ctx, getPendingOutboxEvents, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OutboxEvent{}
+	for rows.Next() {
+		var i OutboxEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.AggregateType,
+			&i.AggregateID,
+			&i.EventType,
+			&i.Payload,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProductByID = `-- name: GetProductByID :one
-SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at
+SELECT id, category_id, name, description, price_cents, created_at, updated_at
 FROM products
 WHERE id = $1
 `
@@ -97,11 +197,58 @@ func (q *Queries) GetProductByID(ctx context.Context, id uuid.UUID) (Product, er
 		&i.Name,
 		&i.Description,
 		&i.PriceCents,
-		&i.StockQuantity,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getStockReservation = `-- name: GetStockReservation :one
+SELECT id, product_id, quantity, status, created_at, updated_at
+FROM stock_reservations
+WHERE id = $1
+`
+
+func (q *Queries) GetStockReservation(ctx context.Context, id uuid.UUID) (StockReservation, error) {
+	row := q.db.QueryRow(ctx, getStockReservation, id)
+	var i StockReservation
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertOutboxEvent = `-- name: InsertOutboxEvent :exec
+INSERT INTO outbox_events (id, aggregate_type, aggregate_id, event_type, payload, status, created_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+`
+
+type InsertOutboxEventParams struct {
+	ID            uuid.UUID `json:"id"`
+	AggregateType string    `json:"aggregate_type"`
+	AggregateID   string    `json:"aggregate_id"`
+	EventType     string    `json:"event_type"`
+	Payload       []byte    `json:"payload"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
+func (q *Queries) InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventParams) error {
+	_, err := q.db.Exec(ctx, insertOutboxEvent,
+		arg.ID,
+		arg.AggregateType,
+		arg.AggregateID,
+		arg.EventType,
+		arg.Payload,
+		arg.Status,
+		arg.CreatedAt,
+	)
+	return err
 }
 
 const listCategories = `-- name: ListCategories :many
@@ -136,7 +283,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, description, price_cents, stock_quantity, created_at, updated_at
+SELECT id, category_id, name, description, price_cents, created_at, updated_at
 FROM products
 WHERE ($3::uuid IS NULL OR category_id = $3)
 ORDER BY created_at DESC
@@ -164,7 +311,6 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.Name,
 			&i.Description,
 			&i.PriceCents,
-			&i.StockQuantity,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -176,4 +322,120 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 		return nil, err
 	}
 	return items, nil
+}
+
+const listProductsByIds = `-- name: ListProductsByIds :many
+SELECT id, category_id, name, description, price_cents, created_at, updated_at
+FROM products
+WHERE id = ANY($1::uuid[])
+`
+
+func (q *Queries) ListProductsByIds(ctx context.Context, dollar_1 []uuid.UUID) ([]Product, error) {
+	rows, err := q.db.Query(ctx, listProductsByIds, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.CategoryID,
+			&i.Name,
+			&i.Description,
+			&i.PriceCents,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const markOutboxEventProcessed = `-- name: MarkOutboxEventProcessed :exec
+UPDATE outbox_events
+SET status = 'PROCESSED'
+WHERE id = $1
+`
+
+func (q *Queries) MarkOutboxEventProcessed(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, markOutboxEventProcessed, id)
+	return err
+}
+
+const updateStockQuantities = `-- name: UpdateStockQuantities :exec
+UPDATE inventory_items
+SET available_quantity = $2,
+    reserved_quantity = $3,
+    updated_at = $4
+WHERE product_id = $1
+`
+
+type UpdateStockQuantitiesParams struct {
+	ProductID         uuid.UUID `json:"product_id"`
+	AvailableQuantity int32     `json:"available_quantity"`
+	ReservedQuantity  int32     `json:"reserved_quantity"`
+	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+func (q *Queries) UpdateStockQuantities(ctx context.Context, arg UpdateStockQuantitiesParams) error {
+	_, err := q.db.Exec(ctx, updateStockQuantities,
+		arg.ProductID,
+		arg.AvailableQuantity,
+		arg.ReservedQuantity,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const updateStockReservationStatus = `-- name: UpdateStockReservationStatus :exec
+UPDATE stock_reservations
+SET status = $2,
+    updated_at = $3
+WHERE id = $1
+`
+
+type UpdateStockReservationStatusParams struct {
+	ID        uuid.UUID `json:"id"`
+	Status    string    `json:"status"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (q *Queries) UpdateStockReservationStatus(ctx context.Context, arg UpdateStockReservationStatusParams) error {
+	_, err := q.db.Exec(ctx, updateStockReservationStatus, arg.ID, arg.Status, arg.UpdatedAt)
+	return err
+}
+
+const upsertInventoryItem = `-- name: UpsertInventoryItem :exec
+INSERT INTO inventory_items (product_id, available_quantity, reserved_quantity, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (product_id) DO UPDATE
+SET available_quantity = EXCLUDED.available_quantity,
+    reserved_quantity = EXCLUDED.reserved_quantity,
+    updated_at = EXCLUDED.updated_at
+`
+
+type UpsertInventoryItemParams struct {
+	ProductID         uuid.UUID `json:"product_id"`
+	AvailableQuantity int32     `json:"available_quantity"`
+	ReservedQuantity  int32     `json:"reserved_quantity"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+func (q *Queries) UpsertInventoryItem(ctx context.Context, arg UpsertInventoryItemParams) error {
+	_, err := q.db.Exec(ctx, upsertInventoryItem,
+		arg.ProductID,
+		arg.AvailableQuantity,
+		arg.ReservedQuantity,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
 }

@@ -17,24 +17,39 @@ type Category struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type InventoryItem struct {
+	ProductID         uuid.UUID `json:"product_id"`
+	AvailableQuantity int32     `json:"available_quantity"`
+	ReservedQuantity  int32     `json:"reserved_quantity"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+}
+
 type OutboxEvent struct {
-	ID            uuid.UUID  `json:"id"`
-	AggregateType string     `json:"aggregate_type"`
-	AggregateID   string     `json:"aggregate_id"`
-	EventType     string     `json:"event_type"`
-	Payload       []byte     `json:"payload"`
-	Status        string     `json:"status"`
-	CreatedAt     time.Time  `json:"created_at"`
-	ProcessedAt   *time.Time `json:"processed_at"`
+	ID            uuid.UUID `json:"id"`
+	AggregateType string    `json:"aggregate_type"`
+	AggregateID   string    `json:"aggregate_id"`
+	EventType     string    `json:"event_type"`
+	Payload       []byte    `json:"payload"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Product struct {
-	ID            uuid.UUID `json:"id"`
-	CategoryID    uuid.UUID `json:"category_id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	PriceCents    int64     `json:"price_cents"`
-	StockQuantity int32     `json:"stock_quantity"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	CategoryID  uuid.UUID `json:"category_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	PriceCents  int64     `json:"price_cents"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type StockReservation struct {
+	ID        uuid.UUID `json:"id"`
+	ProductID uuid.UUID `json:"product_id"`
+	Quantity  int32     `json:"quantity"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -87,25 +89,27 @@ func (u *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Us
 
 // Helper method to write outbox events for both operations
 func (r *UserRepository) saveOutboxEvents(ctx context.Context, user *domain.User) error {
-	// events := user.PopEvents()
+	events := user.PopEvents()
 
-	// for _, event := range events {
-	// 	payload, err := json.Marshal(event)
-	// 	if err != nil {
-	// 		return fmt.Errorf("failed to marshal domain event: %w", err)
-	// 	}
+	for _, event := range events {
+		payload, err := json.Marshal(event)
+		if err != nil {
+			return fmt.Errorf("failed to marshal domain event: %w", err)
+		}
 
-	// 	err = r.queries.CreateOutboxEvent(ctx, db.CreateOutboxEventParams{
-	// 		AggregateType: "User",
-	// 		AggregateID:   user.ID,
-	// 		EventType:     event.EventName(),
-	// 		Payload:       payload,
-	// 		CreatedAt:     event.OccurredAt(),
-	// 	})
-	// 	if err != nil {
-	// 		return fmt.Errorf("failed to save outbox event: %w", err)
-	// 	}
-	// }
+		err = r.queries.InsertOutboxEvent(ctx, db.InsertOutboxEventParams{
+			ID:            uuid.New(),
+			AggregateType: "User",
+			AggregateID:   user.ID.String(),
+			EventType:     event.EventName(),
+			Payload:       payload,
+			Status:        "PENDING",
+			CreatedAt:     time.Now().UTC(),
+		})
+		if err != nil {
+			return fmt.Errorf("failed to save outbox event: %w", err)
+		}
+	}
 
 	return nil
 }

@@ -2,11 +2,14 @@ routes:
   - id: user-service-route
     name: "user-service-route"
     uri: "/user.v1.UserService/*"
-    methods: [POST, OPTIONS]
+    methods: [GET, POST, OPTIONS]
     plugins:
       cors:
-        allow_origins: "**"
-        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
     upstream:
       type: roundrobin
       nodes:
@@ -15,13 +18,81 @@ routes:
   - id: catalog-service-route
     name: "catalog-service-route"
     uri: "/catalog.v1.CatalogService/*"
-    methods: [POST, OPTIONS]
+    methods: [GET, POST, OPTIONS]
     plugins:
       cors:
-        allow_origins: "**"
-        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
     upstream:
       type: roundrobin
       nodes:
         "${{CATALOG_SERVICE_HOST}}:${{CATALOG_SERVICE_PORT}}": 1
+
+  - id: cart-service-route
+    name: "cart-service-route"
+    uri: "/cart.v1.CartService/*"
+    methods: [GET, POST, OPTIONS]
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "${{CART_SERVICE_HOST}}:${{CART_SERVICE_PORT}}": 1
+
+  - id: order-service-route
+    name: "order-service-route"
+    uri: "/order.v1.OrderService/*"
+    methods: [GET, POST, OPTIONS]
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "${{ORDER_SERVICE_HOST}}:${{ORDER_SERVICE_PORT}}": 1
+
+  - id: payment-service-route
+    name: "payment-service-route"
+    uri: "/payment.v1.PaymentService/*"
+    methods: [GET, POST, OPTIONS]
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "${{PAYMENT_SERVICE_HOST}}:${{PAYMENT_SERVICE_PORT}}": 1
+
+  - id: notification-service-route
+    name: "notification-service-route"
+    uri: "/notification.v1.NotificationService/*"
+    methods: [GET, POST, OPTIONS]
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,OPTIONS"
+        allow_headers: "Content-Type,Authorization,connect-protocol-version,x-grpc-web,x-user-agent"
+        expose_headers: "grpc-status,grpc-message,connect-error-code"
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "${{NOTIFICATION_SERVICE_HOST}}:${{NOTIFICATION_SERVICE_PORT}}": 1
+
 #END

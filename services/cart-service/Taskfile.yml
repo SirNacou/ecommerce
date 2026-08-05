@@ -1,0 +1,22 @@
+version: "3"
+
+vars:
+  MIGRATIONS_DIR: migrations
+  # DB_DRIVER: postgres
+  # DB_URL: "postgres://postgres:postgres@localhost:5432/user_db?sslmode=disable"
+
+tasks:
+  sqlc:
+    desc: "Generate sqlc code for Cart Service"
+    cmds:
+      - sqlc generate
+
+  goose:create:
+    desc: "Create a new migration file. Usage: task goose:create -- <migration_name>"
+    cmds:
+      - goose -dir {{.MIGRATIONS_DIR}} create {{.CLI_ARGS}} sql
+
+  up:
+    desc: "Start Cart Service stack"
+    cmds:
+      - docker compose up -d --build

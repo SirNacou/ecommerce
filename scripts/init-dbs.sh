@@ -15,3 +15,7 @@ create_database_if_not_exists() {
 
 create_database_if_not_exists "user_db"
 create_database_if_not_exists "catalog_db"
+create_database_if_not_exists "cart_db"
+create_database_if_not_exists "order_db"
+create_database_if_not_exists "payment_db"
+create_database_if_not_exists "notification_db"

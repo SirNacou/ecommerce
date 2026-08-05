@@ -7,6 +7,18 @@ includes:
   catalog:
     taskfile: ./services/catalog-service/Taskfile.yml
     dir: ./services/catalog-service
+  cart:
+    taskfile: ./services/cart-service/Taskfile.yml
+    dir: ./services/cart-service
+  order:
+    taskfile: ./services/order-service/Taskfile.yml
+    dir: ./services/order-service
+  payment:
+    taskfile: ./services/payment-service/Taskfile.yml
+    dir: ./services/payment-service
+  notification:
+    taskfile: ./services/notification-service/Taskfile.yml
+    dir: ./services/notification-service
 
 tasks:
   default:

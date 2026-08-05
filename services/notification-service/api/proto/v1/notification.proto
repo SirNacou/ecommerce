@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package notification.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/SirNacou/ecommerce/services/notification-service/gen/v1;notificationv1";
+
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+}
+
+enum Channel {
+  CHANNEL_UNSPECIFIED = 0;
+  CHANNEL_EMAIL = 1;
+  CHANNEL_SMS = 2;
+  CHANNEL_PUSH = 3;
+}
+
+message Notification {
+  string id = 1;
+  string user_id = 2;
+  Channel channel = 3;
+  string recipient = 4;
+  string subject = 5;
+  string body = 6;
+  string status = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message SendNotificationRequest {
+  string user_id = 1;
+  Channel channel = 2;
+  string recipient = 3;
+  string subject = 4;
+  string body = 5;
+}
+
+message SendNotificationResponse {
+  Notification notification = 1;
+}
+
+message GetNotificationRequest {
+  string id = 1;
+}
+
+message GetNotificationResponse {
+  Notification notification = 1;
+}

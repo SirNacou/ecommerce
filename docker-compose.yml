@@ -4,6 +4,7 @@ networks:
 
 volumes:
   postgres_data:
+  nats_data:
 
 services:
   # ===========================================================================
@@ -41,14 +42,31 @@ services:
       - ./scripts/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 3s
-      timeout: 3s
+      interval: 5s
+      timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - ecommerce-net
 
   # ===========================================================================
-  # 3. Database Migrations (Goose)
+  # 3. NATS JetStream (Event Bus)
+  # ===========================================================================
+  nats:
+    image: nats:2-alpine
+    container_name: nats-bus
+    command:
+      - -js
+      - --store_dir=/data
+    ports:
+      - "${NATS_PORT:-4222}:4222"
+    volumes:
+      - nats_data:/data
+    networks:
+      - ecommerce-net
+
+  # ===========================================================================
+  # 4. Database Migrations (Goose)
   # ===========================================================================
   user_migrations:
     image: kukymbr/goose-docker:3.27.2
@@ -83,6 +101,86 @@ services:
       - /migrations
       - postgres
       - "${CATALOG_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  cart_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: cart_migrations
+    volumes:
+      - ./services/cart-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${CART_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  order_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: order_migrations
+    volumes:
+      - ./services/order-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${ORDER_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  payment_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: payment_migrations
+    volumes:
+      - ./services/payment-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${PAYMENT_DATABASE_URL}"
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  notification_migrations:
+    image: kukymbr/goose-docker:3.27.2
+    container_name: notification_migrations
+    volumes:
+      - ./services/notification-service/migrations:/migrations
+    env_file:
+      - .env
+    entrypoint:
+      - goose
+      - -dir
+      - /migrations
+      - postgres
+      - "${NOTIFICATION_DATABASE_URL}"
       - up
     depends_on:
       postgres:
@@ -129,6 +227,80 @@ services:
       postgres:
         condition: service_healthy
       catalog_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: services/cart-service/Dockerfile
+    container_name: cart-service
+    ports:
+      - "${CART_SERVICE_PORT:-8083}:${CART_SERVICE_PORT:-8083}"
+    env_file:
+      - .env
+    environment:
+      CATALOG_SERVICE_URL: "http://catalog-service:${CATALOG_SERVICE_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cart_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net
+
+  order-service:
+    build:
+      context: .
+      dockerfile: services/order-service/Dockerfile
+    container_name: order-service
+    ports:
+      - "${ORDER_SERVICE_PORT:-8084}:${ORDER_SERVICE_PORT:-8084}"
+    env_file:
+      - .env
+    environment:
+      PORT: "${ORDER_SERVICE_PORT}"
+      DATABASE_URL: "${ORDER_DATABASE_URL}"
+      CATALOG_SERVICE_URL: "http://catalog-service:${CATALOG_SERVICE_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      order_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    container_name: payment-service
+    ports:
+      - "${PAYMENT_SERVICE_PORT:-8085}:${PAYMENT_SERVICE_PORT:-8085}"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      payment_migrations:
+        condition: service_completed_successfully
+    networks:
+      - ecommerce-net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: notification-service
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT:-8086}:${NOTIFICATION_SERVICE_PORT:-8086}"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification_migrations:
         condition: service_completed_successfully
     networks:
       - ecommerce-net

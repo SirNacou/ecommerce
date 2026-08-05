@@ -13,10 +13,21 @@ import (
 type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
 	CreateProduct(ctx context.Context, arg CreateProductParams) error
+	CreateStockReservation(ctx context.Context, arg CreateStockReservationParams) error
 	GetCategoryByID(ctx context.Context, id uuid.UUID) (Category, error)
+	GetInventoryItem(ctx context.Context, productID uuid.UUID) (InventoryItem, error)
+	GetInventoryItemForUpdate(ctx context.Context, productID uuid.UUID) (InventoryItem, error)
+	GetPendingOutboxEvents(ctx context.Context, limit int32) ([]OutboxEvent, error)
 	GetProductByID(ctx context.Context, id uuid.UUID) (Product, error)
+	GetStockReservation(ctx context.Context, id uuid.UUID) (StockReservation, error)
+	InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventParams) error
 	ListCategories(ctx context.Context) ([]Category, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)
+	ListProductsByIds(ctx context.Context, dollar_1 []uuid.UUID) ([]Product, error)
+	MarkOutboxEventProcessed(ctx context.Context, id uuid.UUID) error
+	UpdateStockQuantities(ctx context.Context, arg UpdateStockQuantitiesParams) error
+	UpdateStockReservationStatus(ctx context.Context, arg UpdateStockReservationStatusParams) error
+	UpsertInventoryItem(ctx context.Context, arg UpsertInventoryItemParams) error
 }
 
 var _ Querier = (*Queries)(nil)

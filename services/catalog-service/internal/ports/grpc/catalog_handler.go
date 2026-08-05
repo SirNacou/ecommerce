@@ -19,24 +19,39 @@ type CatalogHandler struct {
 	catalogv1connect.UnimplementedCatalogServiceHandler
 	createProductCmd  *app.CreateProductCommandHandler
 	getProductQry     *app.GetProductQueryHandler
+	getProductsByIdsQry *app.GetProductsByIdsQueryHandler
 	listProductsQry   *app.ListProductsQueryHandler
 	createCategoryCmd *app.CreateCategoryCommandHandler
 	listCategoriesQry *app.ListCategoriesQueryHandler
+	getStockQry       *app.GetStockQueryHandler
+	setStockCmd       *app.SetStockCommandHandler
+	reserveCmd        *app.ReserveStockCommandHandler
+	releaseCmd        *app.ReleaseStockCommandHandler
 }
 
 func NewCatalogHandler(
 	createProductCmd *app.CreateProductCommandHandler,
 	getProductQry *app.GetProductQueryHandler,
+	getProductsByIdsQry *app.GetProductsByIdsQueryHandler,
 	listProductsQry *app.ListProductsQueryHandler,
 	createCategoryCmd *app.CreateCategoryCommandHandler,
 	listCategoriesQry *app.ListCategoriesQueryHandler,
+	getStockQry *app.GetStockQueryHandler,
+	setStockCmd *app.SetStockCommandHandler,
+	reserveCmd *app.ReserveStockCommandHandler,
+	releaseCmd *app.ReleaseStockCommandHandler,
 ) *CatalogHandler {
 	return &CatalogHandler{
 		createProductCmd:  createProductCmd,
 		getProductQry:     getProductQry,
+		getProductsByIdsQry: getProductsByIdsQry,
 		listProductsQry:   listProductsQry,
 		createCategoryCmd: createCategoryCmd,
 		listCategoriesQry: listCategoriesQry,
+		getStockQry:       getStockQry,
+		setStockCmd:       setStockCmd,
+		reserveCmd:        reserveCmd,
+		releaseCmd:        releaseCmd,
 	}
 }
 
@@ -92,11 +107,10 @@ func (h *CatalogHandler) CreateProduct(
 	req *connect.Request[catalogv1.CreateProductRequest],
 ) (*connect.Response[catalogv1.CreateProductResponse], error) {
 	product, err := h.createProductCmd.Handle(ctx, app.CreateProductCommand{
-		CategoryID:    req.Msg.GetCategoryId(),
-		Name:          req.Msg.GetName(),
-		Description:   req.Msg.GetDescription(),
-		PriceCents:    req.Msg.GetPriceCents(),
-		StockQuantity: req.Msg.GetStockQuantity(),
+		CategoryID:  req.Msg.GetCategoryId(),
+		Name:        req.Msg.GetName(),
+		Description: req.Msg.GetDescription(),
+		PriceCents:  req.Msg.GetPriceCents(),
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidName) ||
@@ -126,6 +140,28 @@ func (h *CatalogHandler) GetProduct(
 
 	return connect.NewResponse(&catalogv1.GetProductResponse{
 		Product: toProtoProduct(product),
+	}), nil
+}
+
+func (h *CatalogHandler) GetProductsByIds(
+	ctx context.Context,
+	req *connect.Request[catalogv1.GetProductsByIdsRequest],
+) (*connect.Response[catalogv1.GetProductsByIdsResponse], error) {
+	products, err := h.getProductsByIdsQry.Handle(ctx, req.Msg.GetIds())
+	if err != nil {
+		if errors.Is(err, domain.ErrProductNotFound) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	protoProducts := make([]*catalogv1.Product, 0, len(products))
+	for _, p := range products {
+		protoProducts = append(protoProducts, toProtoProduct(p))
+	}
+
+	return connect.NewResponse(&catalogv1.GetProductsByIdsResponse{
+		Products: protoProducts,
 	}), nil
 }
 
@@ -184,13 +220,12 @@ func (h *CatalogHandler) ListProducts(
 
 func toProtoProduct(p *domain.Product) *catalogv1.Product {
 	return &catalogv1.Product{
-		Id:            p.ID.String(),
-		CategoryId:    p.CategoryID.String(),
-		Name:          p.Name,
-		Description:   p.Description,
-		PriceCents:    p.PriceCents,
-		StockQuantity: p.StockQuantity,
-		CreatedAt:     timestamppb.New(p.CreatedAt),
+		Id:          p.ID.String(),
+		CategoryId:  p.CategoryID.String(),
+		Name:        p.Name,
+		Description: p.Description,
+		PriceCents:  p.PriceCents,
+		CreatedAt:   timestamppb.New(p.CreatedAt),
 	}
 }
 
@@ -199,5 +234,103 @@ func toProtoCategory(c *domain.Category) *catalogv1.Category {
 		Id:   c.ID.String(),
 		Name: c.Name,
 		Slug: c.Slug,
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Inventory Methods
+// -----------------------------------------------------------------------------
+
+func (h *CatalogHandler) GetStock(
+	ctx context.Context,
+	req *connect.Request[catalogv1.GetStockRequest],
+) (*connect.Response[catalogv1.GetStockResponse], error) {
+	item, err := h.getStockQry.Handle(ctx, req.Msg.GetProductId())
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&catalogv1.GetStockResponse{
+		Item: toProtoInventoryItem(item),
+	}), nil
+}
+
+func (h *CatalogHandler) SetStock(
+	ctx context.Context,
+	req *connect.Request[catalogv1.SetStockRequest],
+) (*connect.Response[catalogv1.SetStockResponse], error) {
+	item, err := h.setStockCmd.Handle(ctx, app.SetStockCommand{
+		ProductID: req.Msg.GetProductId(),
+		Quantity:  req.Msg.GetQuantity(),
+	})
+	if err != nil {
+		if errors.Is(err, domain.ErrInvalidQuantity) {
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&catalogv1.SetStockResponse{
+		Item: toProtoInventoryItem(item),
+	}), nil
+}
+
+func (h *CatalogHandler) ReserveStock(
+	ctx context.Context,
+	req *connect.Request[catalogv1.ReserveStockRequest],
+) (*connect.Response[catalogv1.ReserveStockResponse], error) {
+	err := h.reserveCmd.Handle(ctx, app.ReserveStockCommand{
+		ReservationID: req.Msg.GetReservationId(),
+		ProductID:     req.Msg.GetProductId(),
+		Quantity:      req.Msg.GetQuantity(),
+	})
+	if err != nil {
+		if errors.Is(err, domain.ErrInsufficientStock) || errors.Is(err, domain.ErrInvalidQuantity) {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+		}
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&catalogv1.ReserveStockResponse{
+		Success: true,
+		Message: "Stock reserved successfully",
+	}), nil
+}
+
+func (h *CatalogHandler) ReleaseStock(
+	ctx context.Context,
+	req *connect.Request[catalogv1.ReleaseStockRequest],
+) (*connect.Response[catalogv1.ReleaseStockResponse], error) {
+	err := h.releaseCmd.Handle(ctx, app.ReleaseStockCommand{
+		ReservationID: req.Msg.GetReservationId(),
+		ProductID:     req.Msg.GetProductId(),
+		Quantity:      req.Msg.GetQuantity(),
+	})
+	if err != nil {
+		if errors.Is(err, domain.ErrInvalidQuantity) {
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		}
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&catalogv1.ReleaseStockResponse{
+		Success: true,
+	}), nil
+}
+
+func toProtoInventoryItem(item *domain.InventoryItem) *catalogv1.InventoryItem {
+	return &catalogv1.InventoryItem{
+		ProductId:         item.ProductID.String(),
+		AvailableQuantity: item.AvailableQuantity,
+		ReservedQuantity:  item.ReservedQuantity,
 	}
 }

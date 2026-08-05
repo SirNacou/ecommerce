@@ -36,6 +36,43 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const getPendingOutboxEvents = `-- name: GetPendingOutboxEvents :many
+SELECT id, aggregate_type, aggregate_id, event_type, payload, status, created_at
+FROM outbox_events
+WHERE status = 'PENDING'
+ORDER BY created_at ASC
+LIMIT $1
+FOR UPDATE SKIP LOCKED
+`
+
+func (q *Queries) GetPendingOutboxEvents(ctx context.Context, limit int32) ([]OutboxEvent, error) {
+	rows, err := q.db.Query(ctx, getPendingOutboxEvents, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OutboxEvent{}
+	for rows.Next() {
+		var i OutboxEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.AggregateType,
+			&i.AggregateID,
+			&i.EventType,
+			&i.Payload,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, password_hash, name, created_at
 FROM users
@@ -72,6 +109,45 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const insertOutboxEvent = `-- name: InsertOutboxEvent :exec
+INSERT INTO outbox_events (id, aggregate_type, aggregate_id, event_type, payload, status, created_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+`
+
+type InsertOutboxEventParams struct {
+	ID            uuid.UUID `json:"id"`
+	AggregateType string    `json:"aggregate_type"`
+	AggregateID   string    `json:"aggregate_id"`
+	EventType     string    `json:"event_type"`
+	Payload       []byte    `json:"payload"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
+func (q *Queries) InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventParams) error {
+	_, err := q.db.Exec(ctx, insertOutboxEvent,
+		arg.ID,
+		arg.AggregateType,
+		arg.AggregateID,
+		arg.EventType,
+		arg.Payload,
+		arg.Status,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const markOutboxEventProcessed = `-- name: MarkOutboxEventProcessed :exec
+UPDATE outbox_events
+SET status = 'PROCESSED'
+WHERE id = $1
+`
+
+func (q *Queries) MarkOutboxEventProcessed(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, markOutboxEventProcessed, id)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec

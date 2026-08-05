@@ -12,8 +12,11 @@ import (
 
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) error
+	GetPendingOutboxEvents(ctx context.Context, limit int32) ([]OutboxEvent, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventParams) error
+	MarkOutboxEventProcessed(ctx context.Context, id uuid.UUID) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 }
 

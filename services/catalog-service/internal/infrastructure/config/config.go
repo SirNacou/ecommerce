@@ -8,6 +8,7 @@ type EnvConfig struct {
 	Port        string `env:"PORT,required"`
 	DatabaseURL string `env:"DATABASE_URL,required"`
 	JWTSecret   string `env:"JWT_SECRET,required"`
+	NATSURL     string `env:"NATS_URL"`
 }
 
 func Load() (*EnvConfig, error) {

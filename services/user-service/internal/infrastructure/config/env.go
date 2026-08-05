@@ -10,6 +10,7 @@ type EnvConfig struct {
 	DatabaseURL       string        `env:"DATABASE_URL,required"`
 	Port              string        `env:"PORT,required"`
 	JWTSecret         string        `env:"JWT_SECRET,required"`
+	NATSURL           string        `env:"NATS_URL"`
 	AccessExpiration  time.Duration `env:"ACCESS_EXPIRATION" envDefault:"15m"`
 	RefreshExpiration time.Duration `env:"REFRESH_EXPIRATION" envDefault:"24h"`
 }

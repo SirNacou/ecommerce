@@ -4,6 +4,14 @@ modules:
     name: buf.build/sirnacou/user-service
   - path: services/catalog-service/api/proto
     name: buf.build/sirnacou/catalog-service
+  - path: services/cart-service/api/proto
+    name: buf.build/sirnacou/cart-service
+  - path: services/order-service/api/proto
+    name: buf.build/sirnacou/order-service
+  - path: services/payment-service/api/proto
+    name: buf.build/sirnacou/payment-service
+  - path: services/notification-service/api/proto
+    name: buf.build/sirnacou/notification-service
 lint:
   use:
     - DEFAULT

@@ -45,9 +45,22 @@ const (
 	// CatalogServiceGetProductProcedure is the fully-qualified name of the CatalogService's GetProduct
 	// RPC.
 	CatalogServiceGetProductProcedure = "/catalog.v1.CatalogService/GetProduct"
+	// CatalogServiceGetProductsByIdsProcedure is the fully-qualified name of the CatalogService's
+	// GetProductsByIds RPC.
+	CatalogServiceGetProductsByIdsProcedure = "/catalog.v1.CatalogService/GetProductsByIds"
 	// CatalogServiceListProductsProcedure is the fully-qualified name of the CatalogService's
 	// ListProducts RPC.
 	CatalogServiceListProductsProcedure = "/catalog.v1.CatalogService/ListProducts"
+	// CatalogServiceGetStockProcedure is the fully-qualified name of the CatalogService's GetStock RPC.
+	CatalogServiceGetStockProcedure = "/catalog.v1.CatalogService/GetStock"
+	// CatalogServiceSetStockProcedure is the fully-qualified name of the CatalogService's SetStock RPC.
+	CatalogServiceSetStockProcedure = "/catalog.v1.CatalogService/SetStock"
+	// CatalogServiceReserveStockProcedure is the fully-qualified name of the CatalogService's
+	// ReserveStock RPC.
+	CatalogServiceReserveStockProcedure = "/catalog.v1.CatalogService/ReserveStock"
+	// CatalogServiceReleaseStockProcedure is the fully-qualified name of the CatalogService's
+	// ReleaseStock RPC.
+	CatalogServiceReleaseStockProcedure = "/catalog.v1.CatalogService/ReleaseStock"
 )
 
 // CatalogServiceClient is a client for the catalog.v1.CatalogService service.
@@ -56,7 +69,12 @@ type CatalogServiceClient interface {
 	ListCategories(context.Context, *connect.Request[v1.ListCategoriesRequest]) (*connect.Response[v1.ListCategoriesResponse], error)
 	CreateProduct(context.Context, *connect.Request[v1.CreateProductRequest]) (*connect.Response[v1.CreateProductResponse], error)
 	GetProduct(context.Context, *connect.Request[v1.GetProductRequest]) (*connect.Response[v1.GetProductResponse], error)
+	GetProductsByIds(context.Context, *connect.Request[v1.GetProductsByIdsRequest]) (*connect.Response[v1.GetProductsByIdsResponse], error)
 	ListProducts(context.Context, *connect.Request[v1.ListProductsRequest]) (*connect.Response[v1.ListProductsResponse], error)
+	GetStock(context.Context, *connect.Request[v1.GetStockRequest]) (*connect.Response[v1.GetStockResponse], error)
+	SetStock(context.Context, *connect.Request[v1.SetStockRequest]) (*connect.Response[v1.SetStockResponse], error)
+	ReserveStock(context.Context, *connect.Request[v1.ReserveStockRequest]) (*connect.Response[v1.ReserveStockResponse], error)
+	ReleaseStock(context.Context, *connect.Request[v1.ReleaseStockRequest]) (*connect.Response[v1.ReleaseStockResponse], error)
 }
 
 // NewCatalogServiceClient constructs a client for the catalog.v1.CatalogService service. By
@@ -94,10 +112,40 @@ func NewCatalogServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(catalogServiceMethods.ByName("GetProduct")),
 			connect.WithClientOptions(opts...),
 		),
+		getProductsByIds: connect.NewClient[v1.GetProductsByIdsRequest, v1.GetProductsByIdsResponse](
+			httpClient,
+			baseURL+CatalogServiceGetProductsByIdsProcedure,
+			connect.WithSchema(catalogServiceMethods.ByName("GetProductsByIds")),
+			connect.WithClientOptions(opts...),
+		),
 		listProducts: connect.NewClient[v1.ListProductsRequest, v1.ListProductsResponse](
 			httpClient,
 			baseURL+CatalogServiceListProductsProcedure,
 			connect.WithSchema(catalogServiceMethods.ByName("ListProducts")),
+			connect.WithClientOptions(opts...),
+		),
+		getStock: connect.NewClient[v1.GetStockRequest, v1.GetStockResponse](
+			httpClient,
+			baseURL+CatalogServiceGetStockProcedure,
+			connect.WithSchema(catalogServiceMethods.ByName("GetStock")),
+			connect.WithClientOptions(opts...),
+		),
+		setStock: connect.NewClient[v1.SetStockRequest, v1.SetStockResponse](
+			httpClient,
+			baseURL+CatalogServiceSetStockProcedure,
+			connect.WithSchema(catalogServiceMethods.ByName("SetStock")),
+			connect.WithClientOptions(opts...),
+		),
+		reserveStock: connect.NewClient[v1.ReserveStockRequest, v1.ReserveStockResponse](
+			httpClient,
+			baseURL+CatalogServiceReserveStockProcedure,
+			connect.WithSchema(catalogServiceMethods.ByName("ReserveStock")),
+			connect.WithClientOptions(opts...),
+		),
+		releaseStock: connect.NewClient[v1.ReleaseStockRequest, v1.ReleaseStockResponse](
+			httpClient,
+			baseURL+CatalogServiceReleaseStockProcedure,
+			connect.WithSchema(catalogServiceMethods.ByName("ReleaseStock")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -105,11 +153,16 @@ func NewCatalogServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // catalogServiceClient implements CatalogServiceClient.
 type catalogServiceClient struct {
-	createCategory *connect.Client[v1.CreateCategoryRequest, v1.CreateCategoryResponse]
-	listCategories *connect.Client[v1.ListCategoriesRequest, v1.ListCategoriesResponse]
-	createProduct  *connect.Client[v1.CreateProductRequest, v1.CreateProductResponse]
-	getProduct     *connect.Client[v1.GetProductRequest, v1.GetProductResponse]
-	listProducts   *connect.Client[v1.ListProductsRequest, v1.ListProductsResponse]
+	createCategory   *connect.Client[v1.CreateCategoryRequest, v1.CreateCategoryResponse]
+	listCategories   *connect.Client[v1.ListCategoriesRequest, v1.ListCategoriesResponse]
+	createProduct    *connect.Client[v1.CreateProductRequest, v1.CreateProductResponse]
+	getProduct       *connect.Client[v1.GetProductRequest, v1.GetProductResponse]
+	getProductsByIds *connect.Client[v1.GetProductsByIdsRequest, v1.GetProductsByIdsResponse]
+	listProducts     *connect.Client[v1.ListProductsRequest, v1.ListProductsResponse]
+	getStock         *connect.Client[v1.GetStockRequest, v1.GetStockResponse]
+	setStock         *connect.Client[v1.SetStockRequest, v1.SetStockResponse]
+	reserveStock     *connect.Client[v1.ReserveStockRequest, v1.ReserveStockResponse]
+	releaseStock     *connect.Client[v1.ReleaseStockRequest, v1.ReleaseStockResponse]
 }
 
 // CreateCategory calls catalog.v1.CatalogService.CreateCategory.
@@ -132,9 +185,34 @@ func (c *catalogServiceClient) GetProduct(ctx context.Context, req *connect.Requ
 	return c.getProduct.CallUnary(ctx, req)
 }
 
+// GetProductsByIds calls catalog.v1.CatalogService.GetProductsByIds.
+func (c *catalogServiceClient) GetProductsByIds(ctx context.Context, req *connect.Request[v1.GetProductsByIdsRequest]) (*connect.Response[v1.GetProductsByIdsResponse], error) {
+	return c.getProductsByIds.CallUnary(ctx, req)
+}
+
 // ListProducts calls catalog.v1.CatalogService.ListProducts.
 func (c *catalogServiceClient) ListProducts(ctx context.Context, req *connect.Request[v1.ListProductsRequest]) (*connect.Response[v1.ListProductsResponse], error) {
 	return c.listProducts.CallUnary(ctx, req)
+}
+
+// GetStock calls catalog.v1.CatalogService.GetStock.
+func (c *catalogServiceClient) GetStock(ctx context.Context, req *connect.Request[v1.GetStockRequest]) (*connect.Response[v1.GetStockResponse], error) {
+	return c.getStock.CallUnary(ctx, req)
+}
+
+// SetStock calls catalog.v1.CatalogService.SetStock.
+func (c *catalogServiceClient) SetStock(ctx context.Context, req *connect.Request[v1.SetStockRequest]) (*connect.Response[v1.SetStockResponse], error) {
+	return c.setStock.CallUnary(ctx, req)
+}
+
+// ReserveStock calls catalog.v1.CatalogService.ReserveStock.
+func (c *catalogServiceClient) ReserveStock(ctx context.Context, req *connect.Request[v1.ReserveStockRequest]) (*connect.Response[v1.ReserveStockResponse], error) {
+	return c.reserveStock.CallUnary(ctx, req)
+}
+
+// ReleaseStock calls catalog.v1.CatalogService.ReleaseStock.
+func (c *catalogServiceClient) ReleaseStock(ctx context.Context, req *connect.Request[v1.ReleaseStockRequest]) (*connect.Response[v1.ReleaseStockResponse], error) {
+	return c.releaseStock.CallUnary(ctx, req)
 }
 
 // CatalogServiceHandler is an implementation of the catalog.v1.CatalogService service.
@@ -143,7 +221,12 @@ type CatalogServiceHandler interface {
 	ListCategories(context.Context, *connect.Request[v1.ListCategoriesRequest]) (*connect.Response[v1.ListCategoriesResponse], error)
 	CreateProduct(context.Context, *connect.Request[v1.CreateProductRequest]) (*connect.Response[v1.CreateProductResponse], error)
 	GetProduct(context.Context, *connect.Request[v1.GetProductRequest]) (*connect.Response[v1.GetProductResponse], error)
+	GetProductsByIds(context.Context, *connect.Request[v1.GetProductsByIdsRequest]) (*connect.Response[v1.GetProductsByIdsResponse], error)
 	ListProducts(context.Context, *connect.Request[v1.ListProductsRequest]) (*connect.Response[v1.ListProductsResponse], error)
+	GetStock(context.Context, *connect.Request[v1.GetStockRequest]) (*connect.Response[v1.GetStockResponse], error)
+	SetStock(context.Context, *connect.Request[v1.SetStockRequest]) (*connect.Response[v1.SetStockResponse], error)
+	ReserveStock(context.Context, *connect.Request[v1.ReserveStockRequest]) (*connect.Response[v1.ReserveStockResponse], error)
+	ReleaseStock(context.Context, *connect.Request[v1.ReleaseStockRequest]) (*connect.Response[v1.ReleaseStockResponse], error)
 }
 
 // NewCatalogServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -177,10 +260,40 @@ func NewCatalogServiceHandler(svc CatalogServiceHandler, opts ...connect.Handler
 		connect.WithSchema(catalogServiceMethods.ByName("GetProduct")),
 		connect.WithHandlerOptions(opts...),
 	)
+	catalogServiceGetProductsByIdsHandler := connect.NewUnaryHandler(
+		CatalogServiceGetProductsByIdsProcedure,
+		svc.GetProductsByIds,
+		connect.WithSchema(catalogServiceMethods.ByName("GetProductsByIds")),
+		connect.WithHandlerOptions(opts...),
+	)
 	catalogServiceListProductsHandler := connect.NewUnaryHandler(
 		CatalogServiceListProductsProcedure,
 		svc.ListProducts,
 		connect.WithSchema(catalogServiceMethods.ByName("ListProducts")),
+		connect.WithHandlerOptions(opts...),
+	)
+	catalogServiceGetStockHandler := connect.NewUnaryHandler(
+		CatalogServiceGetStockProcedure,
+		svc.GetStock,
+		connect.WithSchema(catalogServiceMethods.ByName("GetStock")),
+		connect.WithHandlerOptions(opts...),
+	)
+	catalogServiceSetStockHandler := connect.NewUnaryHandler(
+		CatalogServiceSetStockProcedure,
+		svc.SetStock,
+		connect.WithSchema(catalogServiceMethods.ByName("SetStock")),
+		connect.WithHandlerOptions(opts...),
+	)
+	catalogServiceReserveStockHandler := connect.NewUnaryHandler(
+		CatalogServiceReserveStockProcedure,
+		svc.ReserveStock,
+		connect.WithSchema(catalogServiceMethods.ByName("ReserveStock")),
+		connect.WithHandlerOptions(opts...),
+	)
+	catalogServiceReleaseStockHandler := connect.NewUnaryHandler(
+		CatalogServiceReleaseStockProcedure,
+		svc.ReleaseStock,
+		connect.WithSchema(catalogServiceMethods.ByName("ReleaseStock")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/catalog.v1.CatalogService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -193,8 +306,18 @@ func NewCatalogServiceHandler(svc CatalogServiceHandler, opts ...connect.Handler
 			catalogServiceCreateProductHandler.ServeHTTP(w, r)
 		case CatalogServiceGetProductProcedure:
 			catalogServiceGetProductHandler.ServeHTTP(w, r)
+		case CatalogServiceGetProductsByIdsProcedure:
+			catalogServiceGetProductsByIdsHandler.ServeHTTP(w, r)
 		case CatalogServiceListProductsProcedure:
 			catalogServiceListProductsHandler.ServeHTTP(w, r)
+		case CatalogServiceGetStockProcedure:
+			catalogServiceGetStockHandler.ServeHTTP(w, r)
+		case CatalogServiceSetStockProcedure:
+			catalogServiceSetStockHandler.ServeHTTP(w, r)
+		case CatalogServiceReserveStockProcedure:
+			catalogServiceReserveStockHandler.ServeHTTP(w, r)
+		case CatalogServiceReleaseStockProcedure:
+			catalogServiceReleaseStockHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -220,6 +343,26 @@ func (UnimplementedCatalogServiceHandler) GetProduct(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.GetProduct is not implemented"))
 }
 
+func (UnimplementedCatalogServiceHandler) GetProductsByIds(context.Context, *connect.Request[v1.GetProductsByIdsRequest]) (*connect.Response[v1.GetProductsByIdsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.GetProductsByIds is not implemented"))
+}
+
 func (UnimplementedCatalogServiceHandler) ListProducts(context.Context, *connect.Request[v1.ListProductsRequest]) (*connect.Response[v1.ListProductsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.ListProducts is not implemented"))
+}
+
+func (UnimplementedCatalogServiceHandler) GetStock(context.Context, *connect.Request[v1.GetStockRequest]) (*connect.Response[v1.GetStockResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.GetStock is not implemented"))
+}
+
+func (UnimplementedCatalogServiceHandler) SetStock(context.Context, *connect.Request[v1.SetStockRequest]) (*connect.Response[v1.SetStockResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.SetStock is not implemented"))
+}
+
+func (UnimplementedCatalogServiceHandler) ReserveStock(context.Context, *connect.Request[v1.ReserveStockRequest]) (*connect.Response[v1.ReserveStockResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.ReserveStock is not implemented"))
+}
+
+func (UnimplementedCatalogServiceHandler) ReleaseStock(context.Context, *connect.Request[v1.ReleaseStockRequest]) (*connect.Response[v1.ReleaseStockResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("catalog.v1.CatalogService.ReleaseStock is not implemented"))
 }

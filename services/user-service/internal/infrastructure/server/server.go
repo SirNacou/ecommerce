@@ -13,6 +13,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/SirNacou/ecommerce/pkg/eventbus"
 	userv1 "github.com/SirNacou/ecommerce/services/user-service/gen/v1/userv1connect"
 	"github.com/SirNacou/ecommerce/services/user-service/internal/app"
 	"github.com/SirNacou/ecommerce/services/user-service/internal/infrastructure/config"
@@ -22,9 +23,11 @@ import (
 )
 
 type Server struct {
-	cfg    config.EnvConfig
-	pool   *pgxpool.Pool
-	server *http.Server
+	cfg        config.EnvConfig
+	pool       *pgxpool.Pool
+	server     *http.Server
+	bus        *eventbus.Bus
+	dispatcher *eventbus.Dispatcher
 }
 
 func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
@@ -68,15 +71,38 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	return &Server{
+	srv := &Server{
 		cfg:    cfg,
 		pool:   pool,
 		server: httpServer,
-	}, nil
+	}
+
+	// Event bus + outbox dispatcher
+	if cfg.NATSURL != "" {
+		bus, err := eventbus.New(cfg.NATSURL)
+		if err != nil {
+			pool.Close()
+			return nil, fmt.Errorf("eventbus connect failed: %w", err)
+		}
+		reader := postgres.NewOutboxReader(pool)
+		srv.bus = bus
+		srv.dispatcher = eventbus.NewDispatcher(bus, reader, "users", "users")
+	}
+
+	return srv, nil
 }
 
 func (s *Server) Run(ctx context.Context) error {
 	defer s.pool.Close()
+	if s.bus != nil {
+		defer s.bus.Close()
+	}
+
+	if s.dispatcher != nil {
+		if err := s.dispatcher.Start(ctx); err != nil {
+			return fmt.Errorf("failed to start outbox dispatcher: %w", err)
+		}
+	}
 
 	shutdownErr := make(chan error, 1)
 	go func() {

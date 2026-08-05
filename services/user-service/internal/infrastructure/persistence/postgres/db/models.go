@@ -10,6 +10,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type OutboxEvent struct {
+	ID            uuid.UUID `json:"id"`
+	AggregateType string    `json:"aggregate_type"`
+	AggregateID   string    `json:"aggregate_id"`
+	EventType     string    `json:"event_type"`
+	Payload       []byte    `json:"payload"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 type User struct {
 	ID           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`

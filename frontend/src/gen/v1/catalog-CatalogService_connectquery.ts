@@ -25,6 +25,31 @@ export const createProduct = CatalogService.method.createProduct;
 export const getProduct = CatalogService.method.getProduct;
 
 /**
+ * @generated from rpc catalog.v1.CatalogService.GetProductsByIds
+ */
+export const getProductsByIds = CatalogService.method.getProductsByIds;
+
+/**
  * @generated from rpc catalog.v1.CatalogService.ListProducts
  */
 export const listProducts = CatalogService.method.listProducts;
+
+/**
+ * @generated from rpc catalog.v1.CatalogService.GetStock
+ */
+export const getStock = CatalogService.method.getStock;
+
+/**
+ * @generated from rpc catalog.v1.CatalogService.SetStock
+ */
+export const setStock = CatalogService.method.setStock;
+
+/**
+ * @generated from rpc catalog.v1.CatalogService.ReserveStock
+ */
+export const reserveStock = CatalogService.method.reserveStock;
+
+/**
+ * @generated from rpc catalog.v1.CatalogService.ReleaseStock
+ */
+export const releaseStock = CatalogService.method.releaseStock;

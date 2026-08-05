@@ -13,6 +13,16 @@ var (
 	ErrPasswordTooShort = errors.New("password must be at least 6 characters")
 )
 
+type UserRegisteredEvent struct {
+	UserID    string    `json:"user_id"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func (e UserRegisteredEvent) EventName() string     { return "UserRegistered" }
+func (e UserRegisteredEvent) OccurredAt() time.Time { return e.Timestamp }
+
 type User struct {
 	AggregateRoot
 	ID           uuid.UUID
@@ -36,13 +46,23 @@ func NewUser(email, rawPassword, name string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{
+	now := time.Now().UTC()
+	user := &User{
 		ID:           uuid.Must(uuid.NewV7()),
 		Email:        email,
 		PasswordHash: string(hash),
 		Name:         name,
-		CreatedAt:    time.Now().UTC(),
-	}, nil
+		CreatedAt:    now,
+	}
+
+	user.AddEvent(UserRegisteredEvent{
+		UserID:    user.ID.String(),
+		Email:     user.Email,
+		Name:      user.Name,
+		Timestamp: now,
+	})
+
+	return user, nil
 }
 
 func (u *User) ValidatePassword(rawPassword string) bool {

@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/SirNacou/ecommerce/pkg/auth"
+	"github.com/SirNacou/ecommerce/pkg/eventbus"
 	catalogv1 "github.com/SirNacou/ecommerce/services/catalog-service/gen/v1/catalogv1connect"
 	"github.com/SirNacou/ecommerce/services/catalog-service/internal/app"
 	"github.com/SirNacou/ecommerce/services/catalog-service/internal/infrastructure/config"
@@ -22,9 +23,11 @@ import (
 )
 
 type Server struct {
-	cfg    config.EnvConfig
-	pool   *pgxpool.Pool
-	server *http.Server
+	cfg        config.EnvConfig
+	pool       *pgxpool.Pool
+	server     *http.Server
+	bus        *eventbus.Bus
+	dispatcher *eventbus.Dispatcher
 }
 
 func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
@@ -44,21 +47,31 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 	// 2. CQRS Command Handlers
 	createProductCmd := app.NewCreateProductCommandHandler(uow)
 	getProductQry := app.NewGetProductQueryHandler(uow)
+	getProductsByIdsQry := app.NewGetProductsByIdsQueryHandler(uow)
 	listProductsQry := app.NewListProductsQueryHandler(uow)
 	createCategoryCmd := app.NewCreateCategoryCommandHandler(uow)
 	listCategoriesQry := app.NewListCategoriesQueryHandler(uow)
+	getStockQry := app.NewGetStockQueryHandler(uow)
+	setStockCmd := app.NewSetStockCommandHandler(uow)
+	reserveCmd := app.NewReserveStockCommandHandler(uow)
+	releaseCmd := app.NewReleaseStockCommandHandler(uow)
 
 	// 3. Auth Interceptor Setup (using shared pkg/auth)
 	validator := auth.NewJWTValidator(cfg.JWTSecret)
 	publicEndpoints := map[string]bool{
-		"/catalog.v1.CatalogService/ListProducts":   true,
-		"/catalog.v1.CatalogService/GetProduct":     true,
-		"/catalog.v1.CatalogService/ListCategories": true,
+		"/catalog.v1.CatalogService/ListProducts":     true,
+		"/catalog.v1.CatalogService/GetProduct":       true,
+		"/catalog.v1.CatalogService/GetProductsByIds": true,
+		"/catalog.v1.CatalogService/ListCategories":   true,
+		"/catalog.v1.CatalogService/GetStock":         true,
 	}
 	authInterceptor := auth.NewConnectInterceptor(validator, publicEndpoints)
 
 	// 4. Transport Handler & ServeMux Routing
-	catalogHandler := grpcport.NewCatalogHandler(createProductCmd, getProductQry, listProductsQry, createCategoryCmd, listCategoriesQry)
+	catalogHandler := grpcport.NewCatalogHandler(
+		createProductCmd, getProductQry, getProductsByIdsQry, listProductsQry, createCategoryCmd, listCategoriesQry,
+		getStockQry, setStockCmd, reserveCmd, releaseCmd,
+	)
 
 	mux := http.NewServeMux()
 	path, handler := catalogv1.NewCatalogServiceHandler(
@@ -86,15 +99,38 @@ func New(ctx context.Context, cfg config.EnvConfig) (*Server, error) {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	return &Server{
+	srv := &Server{
 		cfg:    cfg,
 		pool:   pool,
 		server: httpServer,
-	}, nil
+	}
+
+	// Event bus + outbox dispatcher
+	if cfg.NATSURL != "" {
+		bus, err := eventbus.New(cfg.NATSURL)
+		if err != nil {
+			pool.Close()
+			return nil, fmt.Errorf("eventbus connect failed: %w", err)
+		}
+		reader := postgres.NewOutboxReader(pool)
+		srv.bus = bus
+		srv.dispatcher = eventbus.NewDispatcher(bus, reader, "inventory", "inventory")
+	}
+
+	return srv, nil
 }
 
 func (s *Server) Run(ctx context.Context) error {
 	defer s.pool.Close()
+	if s.bus != nil {
+		defer s.bus.Close()
+	}
+
+	if s.dispatcher != nil {
+		if err := s.dispatcher.Start(ctx); err != nil {
+			return fmt.Errorf("failed to start outbox dispatcher: %w", err)
+		}
+	}
 
 	shutdownErr := make(chan error, 1)
 	go func() {
